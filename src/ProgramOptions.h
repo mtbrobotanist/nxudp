@@ -19,7 +19,7 @@ namespace nxudp
                 _tokens.push_back(std::string(argv[i]));
         }
 
-        const std::string& getCmdOption(const std::string &option) const
+        const std::string getCmdOption(const std::string &option) const
         {
             std::vector<std::string>::const_iterator itr;
             itr = std::find(_tokens.begin(), _tokens.end(), option);
@@ -27,8 +27,7 @@ namespace nxudp
             if (itr != _tokens.end() && ++itr != _tokens.end())
                 return *itr;
 
-            static const std::string empty_string("");
-            return empty_string;
+            return std::string();
         }
 
         bool cmdOptionExists(const std::string &option) const

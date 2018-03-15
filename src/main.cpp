@@ -27,9 +27,10 @@ int main(int argc, char* argv[])
     }
 
 
-    if(options.cmdOptionExists("-c"))
+    if(options.cmdOptionExists("-c")
+       && options.cmdOptionExists("-n"))
     {
-        // client mode, expecting -n too
+        //client mode
     }
     else if(options.cmdOptionExists("-s"))
     {
