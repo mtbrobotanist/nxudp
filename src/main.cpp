@@ -1,5 +1,6 @@
 #include <iostream>
 #include <asio.hpp>
+#include "ProgramOptions.h"
 
 
 void help()
@@ -17,11 +18,24 @@ void help()
 
 int main(int argc, char* argv[])
 {
-    if(argc == 1)
+    nxudp::ProgramOptions options(argc, argv);
+
+    if(options.empty())
     {
         help();
         return 0;
     }
+
+
+    if(options.cmdOptionExists("-c"))
+    {
+        // client mode, expecting -n too
+    }
+    else if(options.cmdOptionExists("-s"))
+    {
+        //server mode
+    }
+
 
     std::cout << "argc: " << argc << std::endl;
     std::cout << "argv: " << argv[0] << std::endl;

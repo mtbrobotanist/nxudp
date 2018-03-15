@@ -13,7 +13,7 @@ find_package(Threads REQUIRED)
 include_directories(${ASIO_INCLUDE_DIRS})
 
 
-add_executable(app src/main.cpp)
+add_executable(app src/main.cpp src/ProgramOptions.h)
 
 
 target_link_libraries(app Threads::Threads)
