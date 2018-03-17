@@ -84,7 +84,7 @@ void server::async_receive_callback(const asio::error_code &error, std::size_t b
         }
     }
 
-    void server::wait_completed(const std::shared_ptr<client_waiter> &waiter)
+    void server::wait_completed(const std::shared_ptr<client_waiter>& waiter)
     {
         auto func = std::bind(&server::async_send_callback, this,
                                 waiter,

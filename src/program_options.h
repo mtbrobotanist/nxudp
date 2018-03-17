@@ -19,7 +19,7 @@ namespace nxudp
                 _tokens.push_back(std::string(argv[i]));
         }
 
-        bool tryGetCmdOption(const std::string& option, std::string& arg_out) const
+        bool try_get_cmd_option(const std::string &option, std::string &arg_out) const
         {
             std::vector<std::string>::const_iterator itr;
             itr = std::find(_tokens.begin(), _tokens.end(), option);
@@ -34,7 +34,7 @@ namespace nxudp
             return false;
         }
 
-        bool cmdOptionExists(const std::string& option)
+        bool cmd_option_exists(const std::string &option)
         {
             return std::find(_tokens.begin(), _tokens.end(), option) != _tokens.end();
         }

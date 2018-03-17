@@ -4,7 +4,7 @@
 #include "client.h"
 #include "server.h"
 
-void helpExit()
+void help_exit()
 {
     std::string help = "Usage:\n";
     help += "\n";
@@ -19,7 +19,7 @@ void helpExit()
     exit(0);
 }
 
-void validateHost(const std::string& host)
+void validate_host(const std::string &host)
 {
     if(host.find('.') != host.npos)
     {
@@ -34,36 +34,36 @@ void validateHost(const std::string& host)
         if(occurrences != 3)
         {
             std::cout << "Invalid ip address: " << host << std::endl;
-            helpExit();
+            help_exit();
         }
 
     }
 }
 
-void getHostAndPort(const std::string& host_port, std::string& host, std::string& port)
+void get_host_and_port(const std::string &host_port, std::string &host, std::string &port)
 {
     int colon = host_port.find(":");
     if(colon == 0 || colon == host_port.npos)
-        helpExit();
+        help_exit();
 
     host = host_port.substr(0, colon);
     port = host_port.substr(colon + 1);
 }
 
-void serverMode()
+void server_mode()
 {
     asio::io_service io;
     nxudp::server server(io);
     io.run();
 }
 
-void clientMode(const std::string& host_port, const std::string& msec)
+void client_mode(const std::string &host_port, const std::string &msec)
 {
     std::string host;
     std::string port;
-    getHostAndPort(host_port, host, port);
+    get_host_and_port(host_port, host, port);
 
-    validateHost(host);
+    validate_host(host);
 
     asio::io_service io;
     nxudp::client client(io, host, port, msec);
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     if(argc != 2 && argc != 5)
     {
         std::cout << argc << std::endl;
-        helpExit();
+        help_exit();
     }
 
     nxudp::program_options options(argc, argv);
@@ -85,18 +85,18 @@ int main(int argc, char* argv[])
     std::string host_port;
     std::string msec;
 
-    if(options.tryGetCmdOption("-c", host_port)
-       && options.tryGetCmdOption("-n", msec))
+    if(options.try_get_cmd_option("-c", host_port)
+       && options.try_get_cmd_option("-n", msec))
     {
-        clientMode(host_port, msec);
+        client_mode(host_port, msec);
     }
-    else if(options.cmdOptionExists("-s"))
+    else if(options.cmd_option_exists("-s"))
     {
-        serverMode();
+        server_mode();
     }
     else
     {
-        helpExit();
+        help_exit();
     }
 
     return 0;
