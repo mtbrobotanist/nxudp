@@ -13,7 +13,19 @@ find_package(Threads REQUIRED)
 include_directories(${ASIO_INCLUDE_DIRS})
 
 
-add_executable(app src/main.cpp src/ProgramOptions.h)
+set(NXUDP_SOURCES
+        src/client.h
+        src/server.h
+        src/client_waiter.h
+        src/program_options.h
+        src/client.cpp
+        src/server.cpp
+        src/client_waiter.cpp)
 
 
-target_link_libraries(app Threads::Threads)
+add_library(nxudp ${NXUDP_SOURCES})
+target_link_libraries(nxudp Threads::Threads)
+
+
+add_executable(app src/main.cpp)
+target_link_libraries(app nxudp)

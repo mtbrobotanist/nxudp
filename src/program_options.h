@@ -10,27 +10,31 @@
 
 namespace nxudp
 {
-    class ProgramOptions
+    class program_options
     {
     public:
-        ProgramOptions(int &argc, char **argv)
+        program_options(int &argc, char **argv)
         {
             for (int i = 1; i < argc; ++i)
                 _tokens.push_back(std::string(argv[i]));
         }
 
-        const std::string getCmdOption(const std::string &option) const
+        bool tryGetCmdOption(const std::string& option, std::string& arg_out) const
         {
             std::vector<std::string>::const_iterator itr;
             itr = std::find(_tokens.begin(), _tokens.end(), option);
 
-            if (itr != _tokens.end() && ++itr != _tokens.end())
-                return *itr;
+            if (itr != _tokens.end())
+            {
+                arg_out = ++itr != _tokens.end() ? *itr : std::string();
+                return true;
+            }
 
-            return std::string();
+            arg_out = std::string();
+            return false;
         }
 
-        bool cmdOptionExists(const std::string &option) const
+        bool cmdOptionExists(const std::string& option)
         {
             return std::find(_tokens.begin(), _tokens.end(), option) != _tokens.end();
         }
