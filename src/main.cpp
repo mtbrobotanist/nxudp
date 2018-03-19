@@ -70,6 +70,8 @@ int parse_milliseconds(std::string msec)
         std::cout << "Error: " << msec << "is not a valid value for milliseconds" << std::endl;
         help_exit();
     }
+
+    return 0;
 }
 
 void client_mode(const std::string &host_port, const std::string &milliseconds)
