@@ -158,28 +158,30 @@ required tools:
 NOTE: this program has been tested against msvc 14.1, which comes installed with Visual Studio 2017.
 While older compilers(msvc 14.0 with VS 2015 for example) are likely to work, they have not been tested.
 
+Installation
+------------
 
-Run the installer:
-------------------
-1. Select the "Individual Components" Tab
-2. Under "Compilers, build tools, and runtimes", check the following box:
-  * VC++ 2017 v141 toolset
-3. Move through the rest of the installer to finish installing msvc
+There are two ways to install.
 
-A reboot might be required for the program installations to take effect.
+1. run the build/install script inside of the install_os directory
+2. build and install manually from command line
 
 
-Building The Code
------------------
-On Either Windows or Ubuntu, the provided package will have to be unzipped.
-In the File Explorer, double click on the zip file and extract it to your desired directory.
+Install Script
+--------------
 
 Open a terminal:
-1. open the start menu
-2. type cmd.exe
-3. select the highlighted option (Command Prompt)
+  1. open the start menu
+  2. type cmd.exe
+  3. select the highlighted option (Command Prompt)
 
+```
+$ cd <path\to\nxudp\install_os>
+$ install_windows.bat
+```
 
+Manual Build and Install
+------------------------
 
 In a terminal:
 ```
