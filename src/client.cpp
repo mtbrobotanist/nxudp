@@ -21,6 +21,33 @@ client::client(asio::io_service& io,
     }
 }
 
+bool client::resolve_endpoint(asio::io_service& io, const std::string& host, const std::string& port)
+{
+    udp::resolver resolver(io);
+    udp::resolver::query query(udp::v4(), host, port);
+
+    asio::error_code error;
+    udp::resolver::iterator it = resolver.resolve(query, error);
+    udp::resolver::iterator end;
+
+    if(error)
+    {
+        std::cout << "Invalid host:port combination provided." << host << ":" << port << std::endl;
+        return false;
+    }
+
+    if(it == end) // invalid host and port provided.
+    {
+        std::cout << "Invalid host:port combination provided." << std::endl;
+        return  false;
+    }
+    else
+    {
+        _remote_endpoint = *it;
+        return true;
+    }
+}
+
 void client::send_timeout()
 {
     auto func = std::bind(&client::async_send_callback, this,
@@ -68,7 +95,7 @@ void client::async_receive_callback(const asio::error_code &error, std::size_t b
     }
 }
 
-void client::buffer_to_string(nxudp::client::receive_buffer &buf, std::size_t bytes_transferred, std::string &out_message)
+void client::buffer_to_string(const nxudp::client::receive_buffer &buf, std::size_t bytes_transferred, std::string &out_message)
 {
     out_message.reserve(bytes_transferred);
 
@@ -78,31 +105,5 @@ void client::buffer_to_string(nxudp::client::receive_buffer &buf, std::size_t by
     }
 }
 
-    bool client::resolve_endpoint(asio::io_service& io, const std::string& host, const std::string& port)
-    {
-        udp::resolver resolver(io);
-        udp::resolver::query query(udp::v4(), host, port);
-
-        asio::error_code error;
-        udp::resolver::iterator it = resolver.resolve(query, error);
-        udp::resolver::iterator end;
-
-        if(error)
-        {
-            std::cout << "Invalid host:port combination provided." << host << ":" << port << std::endl;
-            return false;
-        }
-
-        if(it == end) // invalid host and port provided.
-        {
-            std::cout << "Invalid host:port combination provided." << std::endl;
-            return  false;
-        }
-        else
-        {
-            _remote_endpoint = *it;
-            return true;
-        }
-    }
 
 }// namespace nxudp
