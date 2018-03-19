@@ -10,43 +10,50 @@
 
 namespace nxudp
 {
-    class program_options
+
+class program_options
+{
+public:
+    program_options(int &argc, char **argv)
     {
-    public:
-        program_options(int &argc, char **argv)
+        if(argc > 1)
         {
+            _tokens.reserve(argc - 1);
+
             for (int i = 1; i < argc; ++i)
                 _tokens.push_back(std::string(argv[i]));
         }
+    }
 
-        bool try_get_cmd_option(const std::string &option, std::string &arg_out) const
+    bool try_get_cmd_option(const std::string &option, std::string &out_arg) const
+    {
+        std::vector<std::string>::const_iterator itr;
+        itr = std::find(_tokens.begin(), _tokens.end(), option);
+
+        if (itr != _tokens.end())
         {
-            std::vector<std::string>::const_iterator itr;
-            itr = std::find(_tokens.begin(), _tokens.end(), option);
-
-            if (itr != _tokens.end())
-            {
-                arg_out = ++itr != _tokens.end() ? *itr : std::string();
-                return true;
-            }
-
-            arg_out = std::string();
-            return false;
+            out_arg = ++itr != _tokens.end() ? *itr : std::string();
+            return true;
         }
 
-        bool cmd_option_exists(const std::string &option)
-        {
-            return std::find(_tokens.begin(), _tokens.end(), option) != _tokens.end();
-        }
+        out_arg = std::string();
+        return false;
+    }
 
-        bool empty()
-        {
-            return _tokens.size() == 0;
-        }
+    bool cmd_option_exists(const std::string &option)
+    {
+        return std::find(_tokens.begin(), _tokens.end(), option) != _tokens.end();
+    }
 
-    private:
-        std::vector<std::string> _tokens;
-    };
-}
+    bool empty()
+    {
+        return _tokens.size() == 0;
+    }
+
+private:
+    std::vector<std::string> _tokens;
+};
+
+}// namespace nxudp
 
 #endif //NX_UDP_PROGRAMOPTIONS_H
