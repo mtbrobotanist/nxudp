@@ -2,6 +2,8 @@ nxudp version 1.0.0
 --------------------
 A sample client/server application demonstrating the use of UDP sockets.
 
+This project was build using asio version 1.12.0 (https://github.com/chriskohlhoff/asio.git)
+
 
 Supported Operating Systems
 ---------------------------
@@ -27,13 +29,13 @@ $ some-command
 ```
 
 The text above is an example of running a commmand on the command line.
-the dollar sign, $ , is where the user typed a command, and the word "output" below it is the output of that command.
-The remainder of this guide will command line examples as shown above.
+the dollar sign, $ , is where the user typed a command, and the word <output> below it is the output of that command.
+The remainder of this guide will have command line examples as shown above.
 
 
 
-Limitations
------------
+Assumptions and Limitations
+---------------------------
 Various parts of this guide have examples with text enclosed in <brackets>.
 These parts are meant to be replaced with actual values by the person following along with this guide.
 
