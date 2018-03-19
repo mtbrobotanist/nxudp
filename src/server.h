@@ -5,10 +5,9 @@
 #ifndef NX_UDP_SERVER_H
 #define NX_UDP_SERVER_H
 
-#include <map>
+#include <unordered_set>
 #include <asio.hpp>
-#include <asio/buffer.hpp>
-#include <set>
+#include "int_buffer.h"
 
 namespace nxudp
 {
@@ -22,7 +21,9 @@ class client_waiter;
 class server
 {
 
-    typedef std::array<char, 128> buffer;
+    typedef int_buffer receive_buffer;
+
+    const std::string _RESPONSE = "DONE";
 
 public:
     server(asio::io_service& io);
@@ -36,7 +37,8 @@ private:
                              const asio::error_code &error,
                              std::size_t bytes_transferred);
 
-    bool try_parse_timeout(buffer &vector, size_t transferred, int& timeout);
+    bool
+    try_parse_timeout(server::receive_buffer &buffer, size_t bytes_transferred, int &out_timeout);
 
     void start_receive();
 
@@ -47,13 +49,11 @@ private:
     asio::io_service& _io;
     udp::socket _socket;
     udp::endpoint _remote_endpoint;
-    buffer _receive_buffer;
+    receive_buffer _receive_buffer;
 
-    std::set<std::shared_ptr<client_waiter>> _waiters;
-
-    const std::string _done = "DONE";
+    std::unordered_set<std::shared_ptr<client_waiter>> _waiters;
 };
 
-}
+}// namespace nxudp
 
 #endif //NX_UDP_SERVER_H

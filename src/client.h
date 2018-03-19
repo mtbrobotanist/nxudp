@@ -15,6 +15,7 @@
 #include <iostream>
 #include <array>
 #include <asio.hpp>
+#include "int_buffer.h"
 
 using asio::ip::udp;
 
@@ -23,27 +24,31 @@ namespace nxudp
 
 class client
 {
+
+    typedef int_buffer send_buffer;
+    typedef std::array<char , 128> receive_buffer;
+
 public:
-    client(asio::io_service& io, const std::string& host, const std::string& port, const::std::string& timeout);
+    client(asio::io_service& io, const std::string& host, const std::string& port, int timeout);
 
     void async_send_callback(const asio::error_code &error, std::size_t bytes_transferred);
 
     void async_receive_callback(const asio::error_code &e, std::size_t bytes_transferred);
 
 private:
-    typedef std::array<char, 128> buffer;
-
+    bool resolve_endpoint(asio::io_service& io, const std::string& host, const std::string& port);
     void send_timeout();
     void wait();
-    std::string buffer_to_string(buffer &buf, std::size_t len);
+    void buffer_to_string(nxudp::client::receive_buffer &buf, std::size_t bytes_transferred, std::string &out_message);
 
 private:
-
     udp::socket _socket;
     udp::endpoint _remote_endpoint;
-    std::string _timeout;
+    int _timeout;
 
-    buffer _receive_buf;
+    send_buffer _send_buffer;
+    receive_buffer _receive_buffer;
+
 };
 
-}
+}// namespace nxudp

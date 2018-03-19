@@ -23,18 +23,17 @@ public:
 
     const udp::endpoint& remote_endpoint() const { return _remote_endpoint; }
 
+    void start_wait();
+
 private:
     void async_timer_callback(const asio::error_code& error);
-
-    void start_wait();
 
 private:
     server& _server;
     udp::endpoint _remote_endpoint;
     asio::steady_timer _timer;
-    int _timeout;
 };
 
-}
+}// namespace nxudp
 
 #endif //NX_UDP_CLIENTINFO_H

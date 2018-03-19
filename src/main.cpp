@@ -19,6 +19,25 @@ void help_exit()
     exit(0);
 }
 
+
+void server_mode()
+{
+    asio::io_service io;
+    nxudp::server server(io);
+    io.run();
+}
+
+
+void get_host_and_port(const std::string &host_port, std::string &host, std::string &port)
+{
+    int colon = host_port.find(":");
+    if(colon == 0 || colon == host_port.npos)
+        help_exit();
+
+    host = host_port.substr(0, colon);
+    port = host_port.substr(colon + 1);
+}
+
 void validate_host(const std::string &host)
 {
     if(host.find('.') != host.npos)
@@ -40,24 +59,20 @@ void validate_host(const std::string &host)
     }
 }
 
-void get_host_and_port(const std::string &host_port, std::string &host, std::string &port)
+int parse_milliseconds(std::string msec)
 {
-    int colon = host_port.find(":");
-    if(colon == 0 || colon == host_port.npos)
+    try
+    {
+        return std::stoi(msec);
+    }
+    catch(std::exception& e)
+    {
+        std::cout << "Error: " << msec << "is not a valid value for milliseconds" << std::endl;
         help_exit();
-
-    host = host_port.substr(0, colon);
-    port = host_port.substr(colon + 1);
+    }
 }
 
-void server_mode()
-{
-    asio::io_service io;
-    nxudp::server server(io);
-    io.run();
-}
-
-void client_mode(const std::string &host_port, const std::string &msec)
+void client_mode(const std::string &host_port, const std::string &milliseconds)
 {
     std::string host;
     std::string port;
@@ -65,12 +80,16 @@ void client_mode(const std::string &host_port, const std::string &msec)
 
     validate_host(host);
 
+    int msec = parse_milliseconds(milliseconds);
+
     asio::io_service io;
     nxudp::client client(io, host, port, msec);
     io.run();
 
     std::cout << "Exiting..." << std::endl;
+    io.stop();
 }
+
 
 int main(int argc, char* argv[])
 {

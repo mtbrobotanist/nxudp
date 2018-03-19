@@ -13,11 +13,9 @@ client_waiter::client_waiter(nxudp::server& server,
                                const udp::endpoint& remote_endpoint,
                                int timeout) :
     _server(server),
-    _timeout(timeout),
     _remote_endpoint(remote_endpoint),
-    _timer(io, std::chrono::milliseconds(_timeout))
+    _timer(io, std::chrono::milliseconds(timeout))
 {
-    start_wait();
 }
 
 void client_waiter::async_timer_callback(const asio::error_code& error)
@@ -35,4 +33,4 @@ void client_waiter::start_wait()
     _timer.async_wait(func);
 }
 
-};
+}// namespace nxudp

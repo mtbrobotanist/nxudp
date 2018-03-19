@@ -30,69 +30,63 @@ void server::start_receive()
 
 void server::async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred)
 {
-    if(error)
-    {
-        std::cout << "Error receiving: " << error << std::endl;
-        return;
-    }
-
     int timeout;
-    if(try_parse_timeout(_receive_buffer, bytes_transferred, timeout))
+    if (error || !try_parse_timeout(_receive_buffer, bytes_transferred, timeout))
     {
+        std::cout << "The server received an invalid timeout from client: "<< _remote_endpoint
+                  << ". Ignoring..." << std::endl;
+    }
+    else
+    {
+        std::cout << "Received request from " << _remote_endpoint << " with value \"" << timeout << "\"" << std::endl;
+
         auto waiter = std::make_shared<client_waiter>(*this, _io, _remote_endpoint, timeout);
 
         _waiters.insert(waiter);
 
-        std::cout << "Received request from " << _remote_endpoint << " with value \"" << timeout << "\"" << std::endl;
-
-        start_receive();
+        waiter->start_wait();
     }
-    else
-        std::cout << "The server received an invalid timeout from client: "
-                  << _remote_endpoint << ". Ignoring" << std::endl;
+
+    start_receive();
 }
 
-    void server::async_send_callback(const std::shared_ptr<client_waiter> &waiter,
-                                     const std::string &message,
-                                     const asio::error_code &error,
-                                     std::size_t bytes_transferred)
+void server::async_send_callback(const std::shared_ptr<client_waiter> &waiter,
+                                 const std::string &message,
+                                 const asio::error_code &error,
+                                 std::size_t /*bytes_transferred*/)
+{
+    if(error)
     {
-        if(error)
-            std::cout << error << std::endl;
-
-        std::cout << "Sent response \"" << message << "\" to " << waiter->remote_endpoint() << std::endl;
-
-        _waiters.erase(waiter);
+        std::cout << "Error sending: " << error << std::endl;
     }
 
-    bool server::try_parse_timeout(server::buffer &buf, size_t transferred, int& timeout)
-    {
-        try
-        {
-            std::string s;
-            s.reserve(transferred);
+    std::string partial_response = "Sent response \"" + message + "\" to ";
+    std::cout << partial_response << waiter->remote_endpoint() << std::endl;
 
-            for(int i = 0; i < transferred; ++i)
-                s += buf[i];
-
-            timeout = std::stoi(s);
-            return true;
-        }
-        catch(std::exception& e)
-        {
-            return false;
-        }
-    }
-
-    void server::wait_completed(const std::shared_ptr<client_waiter>& waiter)
-    {
-        auto func = std::bind(&server::async_send_callback, this,
-                                waiter,
-                                _done,
-                                std::placeholders::_1,
-                                std::placeholders::_2);
-
-        _socket.async_send_to(asio::buffer(_done), waiter->remote_endpoint(), func);
-    }
-
+    _waiters.erase(waiter);
 }
+
+bool server::try_parse_timeout(server::receive_buffer &buffer, size_t bytes_transferred, int &out_timeout)
+{
+    if(bytes_transferred < sizeof(int))
+    {
+        out_timeout = std::numeric_limits<int>::min();
+        return false;
+    }
+
+    out_timeout = nxudp::utils::buffer_to_value(buffer);
+    return true;
+}
+
+void server::wait_completed(const std::shared_ptr<client_waiter>& waiter)
+{
+    auto func = std::bind(&server::async_send_callback, this,
+                            waiter,
+                            _RESPONSE,
+                            std::placeholders::_1,
+                            std::placeholders::_2);
+
+    _socket.async_send_to(asio::buffer(_RESPONSE), waiter->remote_endpoint(), func);
+}
+
+}// namespace nxudp
