@@ -97,7 +97,6 @@ int main(int argc, char* argv[])
 {
     if(argc != 2 && argc != 5)
     {
-        std::cout << argc << std::endl;
         help_exit();
     }
 
