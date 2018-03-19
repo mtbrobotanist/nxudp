@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <asio.hpp>
 #include "int_buffer.h"
+#include "export.h"
 
 namespace nxudp
 {
@@ -18,7 +19,7 @@ using asio::ip::udp;
 class client_waiter;
 
 
-class server
+class NXUDP_API server
 {
 
     typedef int_buffer receive_buffer;
@@ -28,9 +29,11 @@ class server
 public:
     /// The Constructor for the server object.
     /// @param[in] io - the asio::io_service object required to run the server's socket.
-    server(asio::io_service& io);
+	server(asio::io_service& io);
 
-    /// Called by the given waiter to when it's timeout has completed.
+	virtual ~server();
+
+	/// Called by the given waiter to when it's timeout has completed.
     /// @param [in] waiter - the waiter that whose timer has expired.
     void wait_completed(const std::shared_ptr<client_waiter> &waiter);
 

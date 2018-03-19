@@ -21,6 +21,10 @@ client::client(asio::io_service& io,
     }
 }
 
+client::~client()
+{
+}
+
 bool client::resolve_endpoint(asio::io_service& io, const std::string& host, const std::string& port)
 {
     udp::resolver resolver(io);
@@ -99,7 +103,7 @@ void client::buffer_to_string(const nxudp::client::receive_buffer &buf, std::siz
 {
     out_message.reserve(bytes_transferred);
 
-    for(int i = 0; i < bytes_transferred; ++i)
+    for(std::size_t i = 0; i < bytes_transferred; ++i)
     {
         out_message.push_back(buf[i]);
     }

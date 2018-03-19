@@ -19,6 +19,10 @@ server::server(asio::io_service& io) :
     start_receive();
 }
 
+server::~server()
+{
+}
+
 void server::start_receive()
 {
     auto func = std::bind(&server::async_receive_callback, this,

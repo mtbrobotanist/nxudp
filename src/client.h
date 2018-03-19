@@ -16,6 +16,7 @@
 #include <array>
 #include <asio.hpp>
 #include "int_buffer.h"
+#include "export.h"
 
 using asio::ip::udp;
 
@@ -24,7 +25,7 @@ namespace nxudp
 
 /// Represents a client when the app is run in client mode. This class sends a timeout, in milliseconds, to the server.
 /// The server then waits the specfied amount of time before replying back to the client.
-class client
+class NXUDP_API client
 {
 
     typedef int_buffer send_buffer;
@@ -38,6 +39,8 @@ public:
     /// @param[in] timeout - the amount of time, in milliseconds the server should wait before sending a response.
     ///                 This is the timeout sent out on the socket to the server.
     client(asio::io_service& io, const std::string& host, const std::string& port, int timeout);
+
+	virtual ~client();
 
     /// The callback function called by asio when _socket.async_send_to completes..
     /// @param[in] error - an error code if one occured, provided by asio.

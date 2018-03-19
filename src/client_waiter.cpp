@@ -18,6 +18,10 @@ client_waiter::client_waiter(nxudp::server& server,
 {
 }
 
+client_waiter::~client_waiter()
+{
+}
+
 void client_waiter::async_timer_callback(const asio::error_code& error)
 {
     if(error)

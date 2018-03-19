@@ -6,6 +6,7 @@
 #define NX_UDP_INT_BUFFER_H
 
 #include <array>
+#include "export.h"
 
 /// Some utility functions for converting from an integer to a asoi::buffer compatible buffer and back.
 
@@ -20,13 +21,13 @@ namespace utils
 /// Convert the given integer @param value to a int_buffer.
 /// @param[in] value - the integer to convert.
 /// @param[out] out_buffer - the int_buffer to populate.
-void populate_buffer(int value, int_buffer& out_buffer);
+void NXUDP_API populate_buffer(int value, int_buffer& out_buffer);
 
 
 /// Convert the given int_buffer to an integer.
 /// @param[in] in_buffer - the buffer whose contents to parse to an integer.
 /// @returns int - the integer converted from the buffer.
-int buffer_to_value(const int_buffer& in_buffer);
+int NXUDP_API buffer_to_value(const int_buffer& in_buffer);
 
 } //namespace utils
 }//namespace nxudp

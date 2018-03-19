@@ -7,6 +7,7 @@
 
 #include <asio.hpp>
 #include "server.h"
+#include "export.h"
 
 namespace nxudp
 {
@@ -15,7 +16,7 @@ using asio::ip::udp;
 
 
 /// Represents and implements the wait period before the server sends a reply back to the client.
-class client_waiter : public std::enable_shared_from_this<client_waiter>
+class NXUDP_API client_waiter : public std::enable_shared_from_this<client_waiter>
 {
 public:
 
@@ -27,6 +28,8 @@ public:
                      asio::io_service& io,
                      const udp::endpoint& remote_endpoint,
                      int timeout);
+
+	virtual ~client_waiter();
 
     /// Get the remote endpoint that this client_waiter represents.
     /// @returns a const reference to this client_waiters udp::remote endpoint object.

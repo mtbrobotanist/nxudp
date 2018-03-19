@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <vector>
+#include "export.h"
 
 namespace nxudp
 {
@@ -19,7 +20,7 @@ namespace nxudp
 ///     ./app -c -n 1500
 ///
 /// if you were to call options.try_get_cmd_option("-c"), you would receive "-n" as the value, which is probably not what you want.
-class program_options
+class NXUDP_API program_options
 {
 public:
     /// Constructs a program_options object
@@ -36,6 +37,7 @@ public:
         }
     }
 
+	virtual ~program_options(){}
 
     /// Try to get the value of a command option flag.
     /// @param[in] option - the command option whose value to get, for example, "-n"

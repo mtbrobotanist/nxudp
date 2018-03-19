@@ -13,8 +13,10 @@ find_package(Threads REQUIRED)
 
 include_directories(${ASIO_INCLUDE_DIRS})
 
+add_definitions(-DNXUDP_EXPORTS)
 
 set(NXUDP_SOURCES
+		src/export.h
         src/program_options.h
         src/client.h
         src/client.cpp
@@ -29,10 +31,10 @@ set(NXUDP_SOURCES
 add_library(nxudp SHARED ${NXUDP_SOURCES})
 target_link_libraries(nxudp Threads::Threads)
 
-
 add_executable(app src/main.cpp)
-target_link_libraries(app nxudp)
+target_link_libraries(app nxudp Threads::Threads)
 
+add_dependencies(app nxudp)
 
 install(TARGETS app nxudp
         RUNTIME DESTINATION bin
