@@ -64,7 +64,7 @@ $ mkdir build
 $ cd build
 $ cmake -DCMAKE_INSTALL_PREFIX=/opt/nxudp ..
 $ make
-$ make install
+$ sudo make install
 ```
 
 Running the program
@@ -90,12 +90,14 @@ $ ./app -c 127.0.0.1:<12345> -n 5000
 Sent datagram with value “5000” to 127.0.0.1:12345. Waiting for response...
 ```
 
+
 Replace the number <12345> the output from your server mode command (omitting the brackets <>).
 This starts the app in client mode, which requires it to be pointed at the  <ip-address>:<port>  combination of the app that was started in server mode.
 
 In the example above, 5000 indicates the server should wait 5 seconds (5000 milliseconds) before sending a response
 
 Each program should produce additional output, shown here below the original commands:
+
 
 Server Mode
 ```
@@ -105,9 +107,11 @@ Received request from 127.0.0.1:12345 with value “5000”.
 Sent response “DONE” to 127.0.0.1:12345.
 ```
 
+
 In the example above, the final line, "Sent response “DONE” to 127.0.0.1:12345.", will have appeared 5 seconds after the line above it.
 
 The server has been tested with up 200,000 simultaneous clients each with a 1000 millisecond wait time
+
 
 Client mode
 ```
@@ -121,6 +125,7 @@ the final two lines will appear after the client receives a response from the se
 
 
 
+
 WINDOWS
 -------
 required tools:
@@ -129,6 +134,7 @@ required tools:
 
 NOTE: this program has been tested against msvc 14.1, which comes installed with Visual Studio 2017.
 While older compilers(msvc 14.0 with VS 2015 for example) are likely to work, they have not been tested.
+
 
 Run the installer:
 ------------------
@@ -151,6 +157,7 @@ Open a terminal:
 3. select the highlighted option (Command Prompt)
 
 
+
 In a terminal:
 ```
 $ cd <path\to\nxudp>
@@ -160,6 +167,7 @@ $ cmake ..
 $ cmake --build . --target install
 ```
 
+
 This will install the program to the following directory:
 
 * C:\Program Files (x86)\nxudp
@@ -167,12 +175,14 @@ This will install the program to the following directory:
 Running The Program
 -------------------
 
+
 Server mode: In a terminal:
 ```
 $ cd "C:\Program Files (x86)\nxudp\bin"
 $ .\app.exe -s
 Listening port <12345>
 ```
+
 
 The port number in the example <12345> above will not be 12345. take note of the port number your output produced for use in the next section.
 
@@ -184,12 +194,14 @@ $ .\app.exe -c 127.0.0.1:<12345> -n 5000
 Sent datagram with value “5000” to 127.0.0.1:12345. Waiting for response...
 ```
 
+
 Replace the number <12345> the output from your server mode command (omitting the brackets <>).
 This starts the app in client mode, which requires it to be pointed at the  <ip-address>:<port>  combination of the app that was started in server mode.
 
 In the example above, 5000 indicates the server should wait 5 seconds (5000 milliseconds) before sending a response
 
 Each program should produce additional output, shown here below the original commands:
+
 
 Server Mode
 ```
@@ -199,9 +211,11 @@ Received request from 127.0.0.1:12345 with value “5000”.
 Sent response “DONE” to 127.0.0.1:12345.
 ```
 
+
 In the example above, the final line, "Sent response “DONE” to 127.0.0.1:12345.", will have appeared 5 seconds after the line above it.
 
 The server has been tested with up 200,000 simultaneous clients each with a 1000 millisecond wait time
+
 
 
 Client mode
@@ -212,7 +226,9 @@ Received response “DONE” from 127.0.0.1:49452.
 Exiting...
 ```
 
+
 the final two lines in the example above will appear after the client receives a response from the server
+
 
 
 ```
