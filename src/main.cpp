@@ -65,7 +65,7 @@ int parse_milliseconds(std::string msec)
     {
         return std::stoi(msec);
     }
-    catch(std::exception& e)
+    catch(std::exception&)
     {
         std::cout << "Error: " << msec << "is not a valid value for milliseconds" << std::endl;
         help_exit();
