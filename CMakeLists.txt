@@ -15,13 +15,15 @@ include_directories(${ASIO_INCLUDE_DIRS})
 
 
 set(NXUDP_SOURCES
-        src/client.h
-        src/server.h
-        src/client_waiter.h
         src/program_options.h
+        src/client.h
         src/client.cpp
+        src/server.h
         src/server.cpp
-        src/client_waiter.cpp)
+        src/client_waiter.h
+        src/client_waiter.cpp
+        src/int_buffer.h
+        src/int_buffer.cpp)
 
 
 add_library(nxudp SHARED ${NXUDP_SOURCES})
