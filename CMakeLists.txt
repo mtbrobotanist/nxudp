@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(nx_udp)
+project(nxudp)
 
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules")
@@ -13,10 +13,9 @@ find_package(Threads REQUIRED)
 
 include_directories(${ASIO_INCLUDE_DIRS})
 
-add_definitions(-DNXUDP_EXPORTS)
 
 set(NXUDP_SOURCES
-		src/export.h
+	src/export.h
         src/program_options.h
         src/client.h
         src/client.cpp
@@ -26,6 +25,9 @@ set(NXUDP_SOURCES
         src/client_waiter.cpp
         src/int_buffer.h
         src/int_buffer.cpp)
+
+
+add_definitions(-DNXUDP_EXPORTS)
 
 
 add_library(nxudp SHARED ${NXUDP_SOURCES})
