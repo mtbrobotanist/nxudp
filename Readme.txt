@@ -57,6 +57,26 @@ required tools:
   * g++ or clang
   * make
 
+Installation
+------------
+
+There are two ways to install.
+
+1. run the build/install script inside of the install_os directory
+2. build and install manually from command line
+
+
+Install Script
+--------------
+
+```
+$ cd <path/to/nxudp/install_os>
+$ source install-linux.sh
+```
+
+Manual Build and Install
+------------------------
+
 Open a terminal (Ctrl + Alt + T):
 ```
 $ cd <path/to/nxudp>
@@ -67,10 +87,13 @@ $ make
 $ sudo make install
 ```
 
+NOTE: both of these will require root privileges for the final step. Enter your password when prompted.
+
+
 Running the program
 -------------------
 
-The program should now be installed to directory: /opt/nxudp
+The program should now be installed to the following directory: /opt/nxudp
 
 Server mode: in a terminal, type:
 ```
