@@ -23,6 +23,8 @@ namespace nxudp
 class NXUDP_API client
 {
 
+public:
+    
     typedef int_buffer send_buffer;
     typedef std::array<char , 128> receive_buffer;
 
@@ -56,24 +58,12 @@ public:
     void async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred);
 
 private:
-    
-    /// A helper function that parses a string to an integer, assigning it to @param out_int if successful.
-    /// returns true if @param out_timeout was assigned, false otherwise.
-    /// @param[in] int_string - a string representation of an integer
-    /// @param[out] out_int - a reference to an int that will be assigned the pared timeout
-    bool parse_int(const std::string& int_string, int& out_int) const;
-    
+      
     /// Calls the socket's async_send_to() function.
     void send_timeout();
 
     /// Calls the socket's async_receive_from() function;
     void wait();
-
-    /// A helper function that converts the contents of the given buffer to a string.
-    /// @param[in] buffer - the buffer whose contents to convert, typicall filled in by the socket itself.
-    /// @param[in] bytes_transferred - the number of bytes transferred to the socket.
-    /// @param[out] out_message - the string that will be assigned the parsed contents of the buffer
-    void buffer_to_string(const nxudp::client::receive_buffer &buffer, std::size_t bytes_transferred, std::string &out_message);
     
 private:
     
