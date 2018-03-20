@@ -43,7 +43,7 @@ public:
     /// @param[in] option - the command option whose value to get, for example, "-n"
     /// @param[in] out_value - the value associated with the command option flag.
     /// @returns bool - true if there was a command value following the option in the argumensts, false otherwise.
-    bool try_get_cmd_option(const std::string &option, std::string &out_value) const
+    bool get_cmd_option(const std::string &option, std::string &out_value) const
     {
         std::vector<std::string>::const_iterator itr;
         itr = std::find(_tokens.begin(), _tokens.end(), option);

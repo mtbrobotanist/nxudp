@@ -36,11 +36,19 @@ public:
     /// @param[in] io - the asio::io_service object requried to run the internal asio::socket.
     /// @param[in] host - the host to send timeout to.
     /// @param[in] port - the host's port to send the timeout to.
-    /// @param[in] timeout - the amount of time, in milliseconds the server should wait before sending a response.
-    ///                 This is the timeout sent out on the socket to the server.
+    /// @param[in] timeout - the amount of time, in milliseconds, the server should wait before sending a response.
+    /// This is the timeout sent out on the socket to the server.
     client(asio::io_service& io, const std::string& host, const std::string& port, int timeout);
+    
+    /// Constructs a client to that will send the timeout.
+    /// @param[in] io - the asio::io_service object requried to run the internal asio::socket.
+    /// @param[in] host - the host to send timeout to.
+    /// @param[in] port - the host's port to send the timeout to.
+    /// @param[in] timeout - the amount of time, in milliseconds, the server should wait before sending a response, represented as a string.
+    /// This is the timeout sent out on the socket to the server.
+    client(asio::io_service& io, const std::string& host, const std::string& port, const std::string& timeout);
 
-	virtual ~client();
+    virtual ~client();
 
     /// The callback function called by asio when _socket.async_send_to completes..
     /// @param[in] error - an error code if one occured, provided by asio.
@@ -53,13 +61,13 @@ public:
     void async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred);
 
 private:
-    /// A helper function that resolves the host and port information to a proper endpoint.
-    /// Returns true if successful. false otherwise.
-    /// @param[in] io - the io_service required to run the internal _socket.
-    /// @param[in] host - the host to send to.
-    /// @param[in] port - the port on the host to send to.
-    bool resolve_endpoint(asio::io_service& io, const std::string& host, const std::string& port);
-
+    
+    /// A helper function that parses a string to an integer, assigning it to @param out_int if successful.
+    /// returns true if @param out_timeout was assigned, false otherwise.
+    /// @param[in] int_string - a string representation of an integer
+    /// @param[out] out_int - a reference to an int that will be assigned the pared timeout
+    bool parse_int(const std::string& int_string, int& out_int) const;
+    
     /// Calls the socket's async_send_to() function.
     void send_timeout();
 
@@ -71,8 +79,9 @@ private:
     /// @param[in] bytes_transferred - the number of bytes transferred to the socket.
     /// @param[out] out_message - the string that will be assigned the parsed contents of the buffer
     void buffer_to_string(const nxudp::client::receive_buffer &buffer, std::size_t bytes_transferred, std::string &out_message);
-
+    
 private:
+    
     /// The socket used to send the timeout to the server.
     udp::socket _socket;
 

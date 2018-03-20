@@ -4,6 +4,7 @@
 
 #include <functional>
 #include "client.h"
+#include "udp_endpoint_utils.h"
 
 namespace nxudp
 {
@@ -14,41 +15,54 @@ client::client(asio::io_service& io,
     _socket(io, udp::endpoint(udp::v4(), 0)),
     _timeout(timeout)
 {
-    if(resolve_endpoint(io, host, port))
+    std::string error;
+    if(!utils::udp::resolve_endpoint(io, host, port, _remote_endpoint, &error))
     {
-        send_timeout();
-        wait();
+        std::cout << error << std::endl;
+        return;
     }
+    
+    send_timeout();
+    wait();
+}
+
+client::client(asio::io_service& io,
+               const std::string& host,
+               const std::string& port,
+               const::std::string& timeout) :
+    _socket(io, udp::endpoint(udp::v4(), 0))
+{
+    if(!parse_int(timeout, _timeout))
+    {
+        std::cout << "Invalid timeout: " << timeout;
+        return;
+    }
+    
+    std::string error;
+    if(!nxudp::utils::udp::resolve_endpoint(io, host, port, _remote_endpoint, &error))
+    {
+        std::cout << error << std::endl;
+        return;
+    }
+    
+    send_timeout();
+    wait();
 }
 
 client::~client()
 {
 }
 
-bool client::resolve_endpoint(asio::io_service& io, const std::string& host, const std::string& port)
+bool client::parse_int(const std::string& int_string, int& out_int) const
 {
-    udp::resolver resolver(io);
-    udp::resolver::query query(udp::v4(), host, port);
-
-    asio::error_code error;
-    udp::resolver::iterator it = resolver.resolve(query, error);
-    udp::resolver::iterator end;
-
-    if(error)
+    try
     {
-        std::cout << "Invalid host:port combination provided." << host << ":" << port << std::endl;
-        return false;
-    }
-
-    if(it == end) // invalid host and port provided.
-    {
-        std::cout << "Invalid host:port combination provided." << std::endl;
-        return  false;
-    }
-    else
-    {
-        _remote_endpoint = *it;
+        out_int = std::stoi(int_string);
         return true;
+    }
+    catch(std::exception&)
+    {
+        return false;
     }
 }
 

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <regex>
 #include <asio.hpp>
 #include "program_options.h"
 #include "client.h"
@@ -38,54 +39,14 @@ void get_host_and_port(const std::string &host_port, std::string &host, std::str
     port = host_port.substr(colon + 1);
 }
 
-void validate_host(const std::string &host)
-{
-    if(host.find('.') != host.npos)
-    {
-        int occurrences = 0;
-        std::string::size_type pos = 0;
-        std::string target = ".";
-        while ((pos = host.find(target, pos )) != std::string::npos) {
-            ++ occurrences;
-            pos += target.length();
-        }
-
-        if(occurrences != 3)
-        {
-            std::cout << "Invalid ip address: " << host << std::endl;
-            help_exit();
-        }
-
-    }
-}
-
-int parse_milliseconds(std::string msec)
-{
-    try
-    {
-        return std::stoi(msec);
-    }
-    catch(std::exception&)
-    {
-        std::cout << "Error: " << msec << "is not a valid value for milliseconds" << std::endl;
-        help_exit();
-    }
-
-    return 0;
-}
-
 void client_mode(const std::string &host_port, const std::string &milliseconds)
 {
     std::string host;
     std::string port;
     get_host_and_port(host_port, host, port);
 
-    validate_host(host);
-
-    int msec = parse_milliseconds(milliseconds);
-
     asio::io_service io;
-    nxudp::client client(io, host, port, msec);
+    nxudp::client client(io, host, port, milliseconds);
     io.run();
 
     std::cout << "Exiting..." << std::endl;
@@ -105,8 +66,8 @@ int main(int argc, char* argv[])
     std::string host_port;
     std::string msec;
 
-    if(options.try_get_cmd_option("-c", host_port)
-       && options.try_get_cmd_option("-n", msec))
+    if(options.get_cmd_option("-c", host_port)
+       && options.get_cmd_option("-n", msec))
     {
         client_mode(host_port, msec);
     }
