@@ -19,6 +19,7 @@ set(NXUDP_SOURCES
         src/udp_endpoint_utils.h
         src/udp_endpoint_utils.cpp
         src/program_options.h
+        src/program_options.cpp
         src/client.h
         src/client.cpp
         src/server.h
