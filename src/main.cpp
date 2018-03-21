@@ -20,12 +20,31 @@ void help_exit()
     exit(0);
 }
 
+void run_server_mode_threads(asio::io_service& io)
+{
+    unsigned cpu_count =
+            std::max<unsigned>(std::thread::hardware_concurrency(), 1);
+
+    std::vector<std::thread> threads;
+    threads.reserve(cpu_count);
+
+    for(int i = 0; i < cpu_count; ++i)
+    {
+        threads.push_back(std::thread([&io](){ io.run(); }));
+    }
+
+    for(std::thread& t : threads)
+    {
+        t.join();
+    }
+}
 
 void server_mode()
 {
     asio::io_service io;
     nxudp::server server(io);
-    io.run();
+
+    run_server_mode_threads(io);
 }
 
 

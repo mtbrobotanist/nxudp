@@ -30,7 +30,10 @@ set(NXUDP_SOURCES
         src/int_buffer.cpp)
 
 
-add_definitions(-DNXUDP_EXPORTS)
+if(WIN32)
+    # used in export.h for exporting nxudp library target
+    add_definitions(-DNXUDP_EXPORTS)
+endif()
 
 
 add_library(nxudp SHARED ${NXUDP_SOURCES})

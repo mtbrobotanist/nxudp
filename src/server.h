@@ -55,7 +55,7 @@ private:
     /// @param[in] size_t bytes_transferred, the number of bytes transferred transferred into @param buffer.
     /// @param[out] out_timeout - a reference to an integer that will contain the timeout value.
     /// @returns bool - the result of the conversion. true, if successful, false otherwise
-    bool try_parse_timeout(server::receive_buffer &buffer, size_t bytes_transferred, int &out_timeout);
+    bool parse_timeout(server::receive_buffer &buffer, size_t bytes_transferred, int &out_timeout);
 
     /// The function that calls async_receive_from on the socket, specifying async_receive_callback() as the future function.
     void start_receive();
@@ -63,6 +63,11 @@ private:
     /// the callback funciton,called by asio, on completion of the socket's async_receive_from function.
     void async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred);
 
+    /// adds a client waiter from the map
+    void add_waiter(const std::shared_ptr<client_waiter>& waiter);
+
+    /// removes a client_waiter from the map
+    void remove_waiter(const std::shared_ptr<client_waiter>& waiter);
 
 private:
     asio::io_service& _io;
@@ -72,6 +77,7 @@ private:
 
     /// The set of active client_waiter objects.
     std::unordered_set<std::shared_ptr<client_waiter>> _waiters;
+    std::mutex _waiters_mutex;
 };
 
 }// namespace nxudp

@@ -35,20 +35,19 @@ void server::start_receive()
 void server::async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred)
 {
     int timeout;
-    if (error || !try_parse_timeout(_receive_buffer, bytes_transferred, timeout))
+    if (error || !parse_timeout(_receive_buffer, bytes_transferred, timeout))
     {
         std::cout << "The server received an invalid timeout from client: "<< _remote_endpoint
                   << ". Ignoring..." << std::endl;
     }
     else
     {
-        std::cout << "Received request from " << _remote_endpoint << " with value \"" << timeout << "\"" << std::endl;
-
         auto waiter = std::make_shared<client_waiter>(*this, _io, _remote_endpoint, timeout);
 
-        _waiters.insert(waiter);
+        add_waiter(waiter);
 
         waiter->start_wait();
+        std::cout << "Received request from " << _remote_endpoint << " with value \"" << timeout << "\"" << std::endl;
     }
 
     start_receive();
@@ -64,13 +63,13 @@ void server::async_send_callback(const std::shared_ptr<client_waiter> &waiter,
         std::cout << "Error sending: " << error << std::endl;
     }
 
-    std::string partial_response = "Sent response \"" + message + "\" to ";
-    std::cout << partial_response << waiter->remote_endpoint() << std::endl;
+    remove_waiter(waiter);
 
-    _waiters.erase(waiter);
+    std::string partial_response = "Sent response \"" + message + "\" to ";
+    std::cout << partial_response << waiter->remote_endpoint() << " Thread: " << std::this_thread::get_id() << std::endl;
 }
 
-bool server::try_parse_timeout(server::receive_buffer &buffer, size_t bytes_transferred, int &out_timeout)
+bool server::parse_timeout(server::receive_buffer &buffer, size_t bytes_transferred, int &out_timeout)
 {
     if(bytes_transferred < sizeof(int))
     {
@@ -91,6 +90,18 @@ void server::wait_completed(const std::shared_ptr<client_waiter>& waiter)
                             std::placeholders::_2);
 
     _socket.async_send_to(asio::buffer(_RESPONSE), waiter->remote_endpoint(), func);
+}
+
+void server::add_waiter(const std::shared_ptr<client_waiter> &waiter)
+{
+    std::lock_guard<std::mutex> lock(_waiters_mutex);
+    _waiters.insert(waiter);
+}
+
+void server::remove_waiter(const std::shared_ptr<client_waiter> &waiter)
+{
+    std::lock_guard<std::mutex> lock(_waiters_mutex);
+    _waiters.erase(waiter);
 }
 
 }// namespace nxudp
