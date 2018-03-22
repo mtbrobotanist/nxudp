@@ -15,7 +15,7 @@ include_directories(${ASIO_INCLUDE_DIRS})
 
 
 set(NXUDP_SOURCES
-	src/export.h
+	    src/export.h
         src/udp_endpoint_utils.h
         src/udp_endpoint_utils.cpp
         src/program_options.h
@@ -27,7 +27,8 @@ set(NXUDP_SOURCES
         src/client_waiter.h
         src/client_waiter.cpp
         src/int_buffer.h
-        src/int_buffer.cpp)
+        src/int_buffer.cpp
+        src/print_stream.h)
 
 
 if(WIN32)

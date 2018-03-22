@@ -5,6 +5,7 @@
 #include <functional>
 #include "client.h"
 #include "udp_endpoint_utils.h"
+#include "print_stream.h"
 
 namespace nxudp
 {
@@ -31,7 +32,7 @@ bool parse_int(const std::string& int_string, int& out_int)
 /// @param[in] buffer - the buffer whose contents to convert, typicall filled in by the socket itself.
 /// @param[in] bytes_transferred - the number of bytes transferred to the socket.
 /// @param[out] out_message - the string that will be assigned the parsed contents of the buffer
-void buffer_to_string(const nxudp::client::receive_buffer &buffer, std::size_t bytes_transferred, std::string &out_message)
+void buffer_to_string(const nxudp::client::receive_buffer &buffer, std::size_t bytes_transferred, std::string& out_message)
 {
    out_message.reserve(bytes_transferred);
 
@@ -111,12 +112,12 @@ void client::async_send_callback(const asio::error_code &error, std::size_t byte
 {
     if(error)
     {
-        std::cout << "Error sending: " << error << std::endl;
+        print_stream(std::cerr) << "Error sending: " << error << std::endl;
     }
     else
     {
-        std::cout << "Sent datagram with value \"" << _timeout << "\" to " << _remote_endpoint
-                  << ".\nWaiting for response..." << std::endl;
+        print_stream() << "Sent datagram with value \"" << _timeout << "\" to " << _remote_endpoint
+                  << ".\nWaiting for response...\n";
     }
 }
 
@@ -124,13 +125,13 @@ void client::async_receive_callback(const asio::error_code &error, std::size_t b
 {
     if(error)
     {
-        std::cout << "Error receiving:" << error << std::endl;
+        print_stream(std::cerr) << "Error receiving:" << error << std::endl;
     }
     else
     {
         std::string message;
         buffer_to_string(_receive_buffer, bytes_transferred, message);
-        std::cout << "Received response \"" << message << "\" from " << _remote_endpoint << "." << std::endl;
+        print_stream() << "Received response \"" << message << "\" from " << _remote_endpoint << ".\n";
     }
 }
 

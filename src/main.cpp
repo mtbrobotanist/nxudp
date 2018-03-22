@@ -20,6 +20,12 @@ void help_exit()
     exit(0);
 }
 
+
+/**
+ * Note multi threading really isn't needed here.
+ * The server runs fine with a single thread because it
+ * uses async functions. I did this for fun.
+ */
 void run_server_mode_threads(asio::io_service& io)
 {
     unsigned cpu_count =
@@ -51,6 +57,7 @@ void server_mode()
 void get_host_and_port(const std::string& host_port, std::string& host, std::string& port)
 {
     int colon = host_port.find(":");
+
     host = host_port.substr(0, colon);
     port = host_port.substr(colon + 1);
 }
@@ -71,8 +78,9 @@ void client_mode(const std::string& host_port, const std::string& milliseconds)
 void add_command_line_validation(nxudp::program_options& options)
 {
     options.add_validation("-s", std::regex()); // standalone server flag;
-    
-    std::regex host_port("(([^,]*)|(\\d{1,3}(\\.\\d{1,3}){3})):\\d+");
+
+
+    std::regex host_port("([^,]*):\\d+"); // [host-name | ip-address]:port combination
     options.add_validation("-c", host_port);
     
     options.add_validation("-n", std::regex("\\d+"));

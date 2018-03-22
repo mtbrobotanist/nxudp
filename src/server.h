@@ -35,7 +35,7 @@ public:
 
 	/// Called by the given waiter to when it's timeout has completed.
     /// @param [in] waiter - the waiter that whose timer has expired.
-    void wait_completed(const std::shared_ptr<client_waiter> &waiter);
+    void wait_completed(const std::shared_ptr<client_waiter> waiter);
 
 private:
 
@@ -45,7 +45,7 @@ private:
     /// @param [in] message - the message to send over the socket to the waiter's endpoint.
     /// @param [in] error - provided by asio, An error code if one occured during the send operation.
     /// @param [in] bytes_transferred - provided by asio, the number of bytes sent out on the socket.
-    void async_send_callback(const std::shared_ptr<client_waiter> &waiter,
+    void async_send_callback(const std::shared_ptr<client_waiter> waiter,
                              const std::string &message,
                              const asio::error_code &error,
                              std::size_t bytes_transferred);
@@ -78,6 +78,8 @@ private:
     /// The set of active client_waiter objects.
     std::unordered_set<std::shared_ptr<client_waiter>> _waiters;
     std::mutex _waiters_mutex;
+
+    std::mutex _socket_mutex;
 };
 
 }// namespace nxudp
