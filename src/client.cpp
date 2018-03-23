@@ -4,35 +4,20 @@
 
 #include <functional>
 #include "client.h"
-#include "udp_endpoint_utils.h"
+#include "endpoint_utils.h"
 #include "print_stream.h"
 
 namespace nxudp
 {
-    
-/// A helper function that parses a string to an integer, assigning it to @param out_int if successful.
-/// returns true if @param out_timeout was assigned, false otherwise.
-/// @param[in] int_string - a string representation of an integer
-/// @param[out] out_int - a reference to an int that will be assigned the pared timeout
-bool parse_int(const std::string& int_string, int& out_int)
-{
-    try
-    {
-        out_int = std::stoi(int_string);
-        return true;
-    }
-    catch(std::exception&)
-    {
-        return false;
-    }
-}
-    
+
+using asio::ip::udp;
 
 /// A helper function that converts the contents of the given buffer to a string.
-/// @param[in] buffer - the buffer whose contents to convert, typicall filled in by the socket itself.
+/// @param[in] buffer - the buffer whose contents to convert, typically filled in by the socket itself.
 /// @param[in] bytes_transferred - the number of bytes transferred to the socket.
 /// @param[out] out_message - the string that will be assigned the parsed contents of the buffer
-void buffer_to_string(const nxudp::client::receive_buffer &buffer, std::size_t bytes_transferred, std::string& out_message)
+void parse_response(const nxudp::client::receive_buffer &buffer, std::size_t bytes_transferred,
+                    std::string &out_message)
 {
    out_message.reserve(bytes_transferred);
 
@@ -41,48 +26,19 @@ void buffer_to_string(const nxudp::client::receive_buffer &buffer, std::size_t b
        out_message.push_back(buffer[i]);
    }
 }
- 
+
 
 client::client(asio::io_service& io,
-               const std::string& host,
-               const std::string& port,
+               const udp::endpoint& remote_endpoint,
                int timeout) :
     _socket(io, udp::endpoint(udp::v4(), 0)),
+    _remote_endpoint(remote_endpoint),
     _timeout(timeout)
 {
-    std::string error;
-    if(!utils::udp::resolve_endpoint(io, host, port, _remote_endpoint, &error))
-    {
-        std::cout << error << std::endl;
-        return;
-    }
-    
     send_timeout();
     wait();
 }
 
-client::client(asio::io_service& io,
-               const std::string& host,
-               const std::string& port,
-               const::std::string& timeout) :
-    _socket(io, udp::endpoint(udp::v4(), 0))
-{
-    if(!parse_int(timeout, _timeout))
-    {
-        std::cout << "Invalid timeout: " << timeout;
-        return;
-    }
-    
-    std::string error;
-    if(!nxudp::utils::udp::resolve_endpoint(io, host, port, _remote_endpoint, &error))
-    {
-        std::cout << error << std::endl;
-        return;
-    }
-    
-    send_timeout();
-    wait();
-}
 
 client::~client()
 {
@@ -94,7 +50,7 @@ void client::send_timeout()
                           std::placeholders::_1,
                           std::placeholders::_2);
 
-    nxudp::utils::populate_buffer(_timeout, _send_buffer);
+    nxudp::utils::write_buffer(_timeout, _send_buffer);
 
    _socket.async_send_to(asio::buffer(_send_buffer), _remote_endpoint, func);
 }
@@ -112,7 +68,7 @@ void client::async_send_callback(const asio::error_code &error, std::size_t byte
 {
     if(error)
     {
-        print_stream(std::cerr) << "Error sending: " << error << std::endl;
+        print_stream(std::cerr) << "Error sending: " << error << "\n";
     }
     else
     {
@@ -125,14 +81,15 @@ void client::async_receive_callback(const asio::error_code &error, std::size_t b
 {
     if(error)
     {
-        print_stream(std::cerr) << "Error receiving:" << error << std::endl;
+        print_stream(std::cerr) << "Error receiving:" << error << "\n";
     }
     else
     {
         std::string message;
-        buffer_to_string(_receive_buffer, bytes_transferred, message);
+        parse_response(_receive_buffer, bytes_transferred, message);
         print_stream() << "Received response \"" << message << "\" from " << _remote_endpoint << ".\n";
     }
 }
+
 
 }// namespace nxudp

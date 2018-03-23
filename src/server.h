@@ -13,17 +13,12 @@
 namespace nxudp
 {
 
-using asio::ip::udp;
-
-
 class client_waiter;
 
 
 class NXUDP_API server
 {
-
     typedef int_buffer receive_buffer;
-
     const std::string _RESPONSE = "DONE";
 
 public:
@@ -35,7 +30,7 @@ public:
 
 	/// Called by the given waiter to when it's timeout has completed.
     /// @param [in] waiter - the waiter that whose timer has expired.
-    void wait_completed(const std::shared_ptr<client_waiter> waiter);
+    void wait_completed(const std::shared_ptr<client_waiter>& waiter);
 
 private:
 
@@ -55,7 +50,7 @@ private:
     /// @param[in] size_t bytes_transferred, the number of bytes transferred transferred into @param buffer.
     /// @param[out] out_timeout - a reference to an integer that will contain the timeout value.
     /// @returns bool - the result of the conversion. true, if successful, false otherwise
-    bool parse_timeout(server::receive_buffer &buffer, size_t bytes_transferred, int &out_timeout);
+    bool parse_timeout(receive_buffer &buffer, size_t bytes_transferred, int &out_timeout);
 
     /// The function that calls async_receive_from on the socket, specifying async_receive_callback() as the future function.
     void start_receive();
@@ -63,7 +58,7 @@ private:
     /// the callback funciton,called by asio, on completion of the socket's async_receive_from function.
     void async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred);
 
-    /// adds a client waiter from the map
+    /// adds a client waiter from the maps
     void add_waiter(const std::shared_ptr<client_waiter>& waiter);
 
     /// removes a client_waiter from the map
@@ -71,12 +66,13 @@ private:
 
 private:
     asio::io_service& _io;
-    udp::socket _socket;
-    udp::endpoint _remote_endpoint;
-    receive_buffer _receive_buffer;
+    asio::ip::udp::socket _socket;
+    asio::ip::udp::endpoint _remote_endpoint;
+    int_buffer _receive_buffer;
 
     /// The set of active client_waiter objects.
     std::unordered_set<std::shared_ptr<client_waiter>> _waiters;
+
     std::mutex _waiters_mutex;
 
     std::mutex _socket_mutex;

@@ -18,7 +18,10 @@ using asio::ip::udp;
 /// Represents and implements the wait period before the server sends a reply back to the client.
 class NXUDP_API client_waiter : public std::enable_shared_from_this<client_waiter>
 {
+
 public:
+
+    typedef std::shared_ptr<client_waiter> ptr;
 
     /// Constructs a client_waiter object.
     /// @param[in] io - the asio::io_service required to run the client_waiter timer.

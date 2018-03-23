@@ -18,16 +18,16 @@ typedef std::array<uint8_t, sizeof(int)> int_buffer;
 namespace utils
 {
 
-/// Convert the given integer @param value to a int_buffer.
+/// Write the given integer to the given buffer.
 /// @param[in] value - the integer to convert.
 /// @param[out] out_buffer - the int_buffer to populate.
-void NXUDP_API populate_buffer(int value, int_buffer& out_buffer);
+void NXUDP_API write_buffer(int value, int_buffer &out_buffer);
 
 
 /// Convert the given int_buffer to an integer.
 /// @param[in] in_buffer - the buffer whose contents to parse to an integer.
 /// @returns int - the integer converted from the buffer.
-int NXUDP_API buffer_to_value(const int_buffer& in_buffer);
+int NXUDP_API read_buffer(const int_buffer &in_buffer);
 
 } //namespace utils
 }//namespace nxudp

@@ -46,7 +46,7 @@ void server::async_receive_callback(const asio::error_code &error, std::size_t b
     }
     else
     {
-        auto waiter = std::make_shared<client_waiter>(*this, _io, _remote_endpoint, timeout);
+        client_waiter::ptr waiter = std::make_shared<client_waiter>(*this, _io, _remote_endpoint, timeout);
 
         add_waiter(waiter);
 
@@ -54,6 +54,7 @@ void server::async_receive_callback(const asio::error_code &error, std::size_t b
         print_stream() << "Received request from " << _remote_endpoint << " with value \"" << timeout << "\"\n";
     }
 
+    // we want to continue listening for other clients even if there was an error
     start_receive();
 }
 
@@ -80,11 +81,11 @@ bool server::parse_timeout(server::receive_buffer &buffer, size_t bytes_transfer
         return false;
     }
 
-    out_timeout = nxudp::utils::buffer_to_value(buffer);
+    out_timeout = nxudp::utils::read_buffer(buffer);
     return true;
 }
 
-void server::wait_completed(const std::shared_ptr<client_waiter> waiter)
+void server::wait_completed(const std::shared_ptr<client_waiter>& waiter)
 {
     auto func = std::bind(&server::async_send_callback, this,
                             waiter,
@@ -103,7 +104,6 @@ void server::add_waiter(const std::shared_ptr<client_waiter>& waiter)
     _waiters.insert(waiter);
 }
 
-/// removes a client_waiter from the map
 void server::remove_waiter(const std::shared_ptr<client_waiter>& waiter)
 {
     std::lock_guard<std::mutex> lock(_waiters_mutex);

@@ -2,10 +2,12 @@
 #include <regex>
 #include <asio.hpp>
 #include "program_options.h"
+#include "endpoint_utils.h"
 #include "client.h"
 #include "server.h"
+#include "print_stream.h"
 
-void help_exit()
+void help()
 {
     std::string help = "Usage:\n";
     help += "\n";
@@ -15,9 +17,7 @@ void help_exit()
     help += "   Server Mode\n";
     help += "       app -s\n";
 
-    std::cout << help << std::endl;
-
-    exit(0);
+    nxudp::print_stream() << help << "\n";
 }
 
 
@@ -69,19 +69,28 @@ void client_mode(const std::string& host_port, const std::string& milliseconds)
     get_host_and_port(host_port, host, port);
 
     asio::io_service io;
-    nxudp::client client(io, host, port, milliseconds);
-    io.run();
+    asio::ip::udp::endpoint remote_endpoint;
 
-    std::cout << "Exiting..." << std::endl;
+    std::string error;
+    if(nxudp::utils::resolve_endpoint(io, host, port, remote_endpoint, &error))
+    {
+        nxudp::client client(io, remote_endpoint, std::stoi(milliseconds));
+        io.run();
+    }
+    else
+    {
+        nxudp::print_stream() << error << "\n";
+    }
+
+
+    nxudp::print_stream() << "Exiting...\n";
 }
 
 void add_command_line_validation(nxudp::program_options& options)
 {
     options.add_validation("-s", std::regex()); // standalone server flag;
 
-
-    std::regex host_port("([^,]*):\\d+"); // [host-name | ip-address]:port combination
-    options.add_validation("-c", host_port);
+    options.add_validation("-c", std::regex("([^,]*):\\d+")); // [host-name | ip-address]:port combination
     
     options.add_validation("-n", std::regex("\\d+"));
 }
@@ -106,7 +115,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        help_exit();
+        help();
     }
 
     return 0;

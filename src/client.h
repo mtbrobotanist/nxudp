@@ -13,8 +13,6 @@
 #include "int_buffer.h"
 #include "export.h"
 
-using asio::ip::udp;
-
 namespace nxudp
 {
 
@@ -29,21 +27,12 @@ public:
     typedef std::array<char , 128> receive_buffer;
 
 public:
-    /// Constructs a client to that will send the timeout.
+    /// Constructs a client that will send the timeout.
     /// @param[in] io - the asio::io_service object requried to run the internal asio::socket.
-    /// @param[in] host - the host to send timeout to.
-    /// @param[in] port - the host's port to send the timeout to.
+    /// @param[in] remote_endpoint - the host port combination to send the timeout to.
     /// @param[in] timeout - the amount of time, in milliseconds, the server should wait before sending a response.
     /// This is the timeout sent out on the socket to the server.
-    client(asio::io_service& io, const std::string& host, const std::string& port, int timeout);
-    
-    /// Constructs a client to that will send the timeout.
-    /// @param[in] io - the asio::io_service object requried to run the internal asio::socket.
-    /// @param[in] host - the host to send timeout to.
-    /// @param[in] port - the host's port to send the timeout to.
-    /// @param[in] timeout - the amount of time, in milliseconds, the server should wait before sending a response, represented as a string.
-    /// This is the timeout sent out on the socket to the server.
-    client(asio::io_service& io, const std::string& host, const std::string& port, const std::string& timeout);
+    client(asio::io_service& io, const asio::ip::udp::endpoint& remote_endpoint, int timeout);
 
     virtual ~client();
 
@@ -68,10 +57,10 @@ private:
 private:
     
     /// The socket used to send the timeout to the server.
-    udp::socket _socket;
+    asio::ip::udp::socket _socket;
 
     /// The remote endpoint of the server.
-    udp::endpoint _remote_endpoint;
+    asio::ip::udp::endpoint _remote_endpoint;
 
     /// The timeout to send to the server.
     int _timeout;

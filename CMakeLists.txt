@@ -16,8 +16,8 @@ include_directories(${ASIO_INCLUDE_DIRS})
 
 set(NXUDP_SOURCES
 	    src/export.h
-        src/udp_endpoint_utils.h
-        src/udp_endpoint_utils.cpp
+        src/endpoint_utils.h
+        src/endpoint_utils.cpp
         src/program_options.h
         src/program_options.cpp
         src/client.h

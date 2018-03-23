@@ -6,15 +6,13 @@
  * Created on March 19, 2018, 6:30 PM
  */
 
-#include "udp_endpoint_utils.h"
+#include "endpoint_utils.h"
 
 namespace nxudp
 {
 namespace utils 
 {    
-namespace udp
-{
-    
+
 using asio::ip::udp;    
 
 bool resolve_endpoint(asio::io_service& io, const std::string& host, const std::string& port, udp::endpoint& out_endpoint, std::string* out_error)
@@ -24,9 +22,8 @@ bool resolve_endpoint(asio::io_service& io, const std::string& host, const std::
 
     asio::error_code error;
     udp::resolver::iterator it = resolver.resolve(query, error);
-    udp::resolver::iterator end;
 
-    if(error)
+    if(error) // error during query resolution
     {
         if(out_error)
         {
@@ -36,20 +33,19 @@ bool resolve_endpoint(asio::io_service& io, const std::string& host, const std::
         return false;
     }
 
-    if(it == end) // invalid host and port provided.
+    if(it == udp::resolver::iterator()) // no host port combination found
     {
         if(out_error)
         {
             *out_error = "No matching host:port combination found.";
         }
         
-        return  false;
+        return false;
     }
 
     out_endpoint = *it;
     return true;
 }
 
-}
 } // namespace utils
 } // namespace nxudp

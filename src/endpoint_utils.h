@@ -16,8 +16,6 @@ namespace nxudp
 {
 namespace utils 
 {
-namespace udp
-{
  
 /// A helper function that resolves the host and port information to a proper endpoint.
 /// Returns true if successful. false otherwise.
@@ -31,8 +29,6 @@ bool NXUDP_API resolve_endpoint(asio::io_service& io,
                                 const std::string& port,
                                 asio::ip::udp::endpoint& out_endpoint, 
                                 std::string* out_error = nullptr);
-
-} // namespace udp
 } // namespace utils
 } // namespace nxudp
 

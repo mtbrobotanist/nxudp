@@ -6,28 +6,30 @@
 
 namespace nxudp
 {
-    namespace utils
+namespace utils
+{
+
+std::size_t INT_SIZE = sizeof(int);
+
+void write_buffer(int value, int_buffer &out_buffer)
+{
+    for(std::size_t i = 0; i < INT_SIZE; ++i)
     {
-        std::size_t int_size = sizeof(int);
-        
-        void populate_buffer(int value, int_buffer& out_buffer)
-        {
-            for(std::size_t i = 0; i < int_size; ++i)
-            {
-                out_buffer[i] = value >> (i * 8);
-            }
-        }
-
-        int buffer_to_value(const int_buffer& in_buffer)
-        {
-            int result = 0;
-            
-            for(std::size_t i = 0; i < int_size; ++i)
-            {
-                result |= in_buffer[i] << (i * 8);
-            }
-
-            return result;
-        }
+        out_buffer[i] = value >> (i * 8);
     }
 }
+
+int read_buffer(const int_buffer &in_buffer)
+{
+    int result = 0;
+
+    for(std::size_t i = 0; i < INT_SIZE; ++i)
+    {
+        result |= in_buffer[i] << (i * 8);
+    }
+
+    return result;
+}
+
+} // namespace utils
+} // namespace nxudp
