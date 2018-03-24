@@ -13,7 +13,7 @@
 namespace nxudp
 {
 
-class client_waiter;
+class timed_session;
 
 
 class NXUDP_API server
@@ -32,7 +32,7 @@ public:
 
 	/// Called by the given waiter to when it's timeout has completed.
     /// @param [in] waiter - the waiter that whose timer has expired.
-    void wait_completed(const std::shared_ptr<client_waiter>& waiter);
+    void wait_completed(const std::shared_ptr<timed_session>& waiter);
 
 private:
 
@@ -42,7 +42,7 @@ private:
     /// @param [in] message - the message to send over the socket to the waiter's endpoint.
     /// @param [in] error - provided by asio, An error code if one occured during the send operation.
     /// @param [in] bytes_transferred - provided by asio, the number of bytes sent out on the socket.
-    void async_send_callback(const std::shared_ptr<client_waiter> waiter,
+    void async_send_callback(const std::shared_ptr<timed_session> waiter,
                              const std::string &message,
                              const asio::error_code &error,
                              std::size_t bytes_transferred);
@@ -61,10 +61,10 @@ private:
     void async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred);
 
     /// adds a client waiter from the maps
-    void add_waiter(const std::shared_ptr<client_waiter>& waiter);
+    void add_waiter(const std::shared_ptr<timed_session>& waiter);
 
     /// removes a client_waiter from the map
-    void remove_waiter(const std::shared_ptr<client_waiter>& waiter);
+    void remove_waiter(const std::shared_ptr<timed_session>& waiter);
 
 private:
     asio::io_service& _io;
@@ -73,7 +73,7 @@ private:
     int_buffer _receive_buffer;
 
     /// The set of active client_waiter objects.
-    std::unordered_set<std::shared_ptr<client_waiter>> _waiters;
+    std::unordered_set<std::shared_ptr<timed_session>> _waiters;
 
     std::mutex _waiters_mutex;
 

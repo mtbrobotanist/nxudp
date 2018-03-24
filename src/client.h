@@ -9,8 +9,9 @@
 
 #include <iostream>
 #include <array>
-#include "client_info.h"
+#include "session_data.h"
 #include "int_buffer.h"
+#include "session_data.h"
 #include "export.h"
 
 namespace nxudp
@@ -32,16 +33,14 @@ public:
     /// @param[in] server_endpoint - the host port combination to send the timeout to.
     /// @param[in] timeout - the amount of time, in milliseconds, the server should wait before sending a response.
     /// This is the timeout sent out on the socket to the server.
-    client(asio::io_service& io, const client_info& client_info);
+    client(asio::io_service& io, const session_data& server_session_data);
 
     virtual ~client();
 
 private:
 
-    /// get the endpoint of the server this client is connected to.
-    const asio::ip::udp::endpoint& server_endpoint() const;
-
-    int timeout() const;
+    /// connects the _socket to the server_endpoint()
+    void connect_to_server();
 
     /// Calls the socket's async_send_to() function.
     void send_timeout();
@@ -54,16 +53,32 @@ private:
     /// @param[in] bytes_transferred - the number of bytes sent out on the _socket, provided by asio.
     void async_send_callback(const asio::error_code &error, std::size_t bytes_transferred);
 
-    /// The callback function called by asio when _socket.async_receive_from completes.
+    /// The callback function called by asio when _socket.async_receive_from() completes.
     /// @param[in] error - an error code if one occured, provided by asio.
     /// @param[in] bytes_transferred - the number of bytes sent out on the _socket, provided by asio.
     void async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred);
 
-
+    /// The callback function called by asiuon when _socket.async_connect() completes.
+    /// @param[in] error - the error code in one occured.
     void async_connect_callback(const asio::error_code &error);
+
+    /// A helper function that converts the contents of the given buffer to a string.
+    /// @param[in] buffer - the buffer whose contents to convert, typically filled in by the socket itself.
+    /// @param[in] bytes_transferred - the number of bytes transferred to the socket.
+    /// @param[out] out_message - the string that will be assigned the parsed contents of the buffer
+    void parse_response(const nxudp::client::receive_buffer &buffer, std::size_t bytes_transferred,
+                        std::string& out_message);
+
+    /// get the endpoint of the server this client is connected to.
+    const asio::ip::udp::endpoint& server_endpoint() const;
+
+    /// get the time out for this client
+    int timeout() const;
+
 private:
 
-    client_info _client_info;
+    /// the client_data: ip:port combo + timeout
+    session_data _session_data;
 
     /// The socket used to send the timeout to the server.
     asio::ip::udp::socket _socket;
@@ -75,8 +90,6 @@ private:
     /// The buffer that received the response from the server.
     /// The socket writes to the this buffer, we read from it.
     receive_buffer _receive_buffer;
-
-    void connect_to_server();
 };
 
 }// namespace nxudp

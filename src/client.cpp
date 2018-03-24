@@ -12,25 +12,8 @@ namespace nxudp
 
 using asio::ip::udp;
 
-/// A helper function that converts the contents of the given buffer to a string.
-/// @param[in] buffer - the buffer whose contents to convert, typically filled in by the socket itself.
-/// @param[in] bytes_transferred - the number of bytes transferred to the socket.
-/// @param[out] out_message - the string that will be assigned the parsed contents of the buffer
-void parse_response(const nxudp::client::receive_buffer &buffer, std::size_t bytes_transferred,
-                    std::string &out_message)
-{
-   out_message.reserve(bytes_transferred);
-
-   for(std::size_t i = 0; i < bytes_transferred; ++i)
-   {
-       out_message.push_back(buffer[i]);
-   }
-}
-
-
-client::client(asio::io_service& io,
-               const client_info& client_info) :
-    _client_info(client_info),
+client::client(asio::io_service& io, const session_data& server_session_data) :
+    _session_data(server_session_data),
     _socket(io, udp::endpoint(udp::v4(), 0))
 {
     connect_to_server();
@@ -39,6 +22,7 @@ client::client(asio::io_service& io,
 
 client::~client()
 {
+    print_stream() << "Exiting..." << std::endl;
 }
 
 void client::connect_to_server()
@@ -97,7 +81,7 @@ void client::async_send_callback(const asio::error_code &error, std::size_t)
 
 void client::async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred)
 {
-    if(error)
+    if (error)
     {
         print_stream(std::cerr) << "Error receiving:" << error << "\n";
     }
@@ -105,18 +89,31 @@ void client::async_receive_callback(const asio::error_code &error, std::size_t b
     {
         std::string message;
         parse_response(_receive_buffer, bytes_transferred, message);
+
         print_stream() << "Received response \"" << message << "\" from " << server_endpoint() << ".\n";
     }
 }
 
-int client::timeout() const
+void client::parse_response(const nxudp::client::receive_buffer &buffer,
+                            std::size_t bytes_transferred,
+                            std::string& out_message)
 {
-    return _client_info.timeout();
+    out_message.reserve(bytes_transferred);
+
+    for(std::size_t i = 0; i < bytes_transferred; ++i)
+    {
+        out_message.push_back(buffer[i]);
+    }
 }
 
 const asio::ip::udp::endpoint& client::server_endpoint() const
 {
-    return _client_info.remote_endpoint();
+    return _session_data.remote_endpoint;
+}
+
+int client::timeout() const
+{
+    return _session_data.timeout;
 }
 
 }// namespace nxudp

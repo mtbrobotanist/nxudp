@@ -5,7 +5,7 @@
 #include <iostream>
 #include "server.h"
 #include "print_stream.h"
-#include "client_waiter.h"
+#include "timed_session.h"
 
 
 namespace nxudp
@@ -49,7 +49,7 @@ void server::async_receive_callback(const asio::error_code &error, std::size_t b
     }
     else
     {
-        client_waiter::ptr waiter = std::make_shared<client_waiter>(*this, _io, client_info(_client_endpoint, timeout));
+        timed_session::ptr waiter = std::make_shared<timed_session>(*this, _io, session_data(_client_endpoint, timeout));
 
         add_waiter(waiter);
 
@@ -61,7 +61,7 @@ void server::async_receive_callback(const asio::error_code &error, std::size_t b
     start_receive();
 }
 
-void server::async_send_callback(const std::shared_ptr<client_waiter> waiter,
+void server::async_send_callback(const std::shared_ptr<timed_session> waiter,
                                  const std::string &message,
                                  const asio::error_code &error,
                                  std::size_t /*bytes_transferred*/)
@@ -88,7 +88,7 @@ bool server::parse_timeout(server::receive_buffer &buffer, size_t bytes_transfer
     return true;
 }
 
-void server::wait_completed(const std::shared_ptr<client_waiter>& waiter)
+void server::wait_completed(const std::shared_ptr<timed_session>& waiter)
 {
     auto func = std::bind(&server::async_send_callback, this,
                             waiter,
@@ -101,13 +101,13 @@ void server::wait_completed(const std::shared_ptr<client_waiter>& waiter)
     _socket.async_send_to(asio::buffer(_RESPONSE), waiter->client_endpoint(), func);
 }
 
-void server::add_waiter(const std::shared_ptr<client_waiter>& waiter)
+void server::add_waiter(const std::shared_ptr<timed_session>& waiter)
 {
     std::lock_guard<std::mutex> lock(_waiters_mutex);
     _waiters.insert(waiter);
 }
 
-void server::remove_waiter(const std::shared_ptr<client_waiter>& waiter)
+void server::remove_waiter(const std::shared_ptr<timed_session>& waiter)
 {
     std::lock_guard<std::mutex> lock(_waiters_mutex);
     _waiters.erase(waiter);

@@ -5,6 +5,7 @@
 #include "endpoint_utils.h"
 #include "client.h"
 #include "server.h"
+#include "session_data.h"
 #include "print_stream.h"
 
 void help()
@@ -69,21 +70,18 @@ void client_mode(const std::string& host_port, const std::string& milliseconds)
     get_host_and_port(host_port, host, port);
 
     asio::io_service io;
-    asio::ip::udp::endpoint remote_endpoint;
+    asio::ip::udp::endpoint server_endpoint;
 
     std::string error;
-    if(nxudp::utils::resolve_endpoint(io, host, port, remote_endpoint, &error))
+    if(nxudp::utils::resolve_endpoint(io, host, port, server_endpoint, &error))
     {
-        nxudp::client client(io, nxudp::client_info(remote_endpoint, std::stoi(milliseconds)));
+        nxudp::client client(io, nxudp::session_data(server_endpoint, std::stoi(milliseconds)));
         io.run();
     }
     else
     {
         nxudp::print_stream() << error << "\n";
     }
-
-
-    nxudp::print_stream() << "Exiting...\n";
 }
 
 void add_command_line_validation(nxudp::program_options& options)

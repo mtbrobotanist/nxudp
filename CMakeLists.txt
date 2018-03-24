@@ -24,13 +24,12 @@ set(NXUDP_SOURCES
         src/client.cpp
         src/server.h
         src/server.cpp
-        src/client_waiter.h
-        src/client_waiter.cpp
+        src/timed_session.h
+        src/timed_session.cpp
         src/int_buffer.h
         src/int_buffer.cpp
         src/print_stream.h
-        src/client_info.cpp
-        src/client_info.h)
+        src/session_data.h)
 
 
 if(WIN32)
