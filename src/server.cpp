@@ -88,17 +88,17 @@ bool server::parse_timeout(server::receive_buffer &buffer, size_t bytes_transfer
     return true;
 }
 
-void server::wait_completed(const std::shared_ptr<timed_session>& waiter)
+void server::end_session(const std::shared_ptr<timed_session>& session)
 {
     auto func = std::bind(&server::async_send_callback, this,
-                            waiter,
+                            session,
                             _RESPONSE,
                             std::placeholders::_1,
                             std::placeholders::_2);
 
     std::lock_guard<std::mutex> lock(_socket_mutex);
 
-    _socket.async_send_to(asio::buffer(_RESPONSE), waiter->client_endpoint(), func);
+    _socket.async_send_to(asio::buffer(_RESPONSE), session->client_endpoint(), func);
 }
 
 void server::add_waiter(const std::shared_ptr<timed_session>& waiter)

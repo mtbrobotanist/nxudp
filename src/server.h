@@ -31,8 +31,8 @@ public:
 	virtual ~server();
 
 	/// Called by the given waiter to when it's timeout has completed.
-    /// @param [in] waiter - the waiter that whose timer has expired.
-    void wait_completed(const std::shared_ptr<timed_session>& waiter);
+    /// @param [in] session - the waiter that whose timer has expired.
+    void end_session(const std::shared_ptr<timed_session>& session);
 
 private:
 

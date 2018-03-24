@@ -27,7 +27,7 @@ void timed_session::async_timer_callback(const asio::error_code& error)
         print_stream(std::cerr) << "Error during timed wait: " << error << "\n";
     }
 
-    _server.wait_completed(shared_from_this());
+    _server.end_session(shared_from_this());
 }
 
 void timed_session::start_wait()
