@@ -21,6 +21,8 @@ class NXUDP_API server
     typedef int_buffer receive_buffer;
     const std::string _RESPONSE = "DONE";
 
+    typedef asio::ip::udp::endpoint endpoint;
+
 public:
     /// The Constructor for the server object.
     /// @param[in] io - the asio::io_service object required to run the server's socket.
@@ -67,7 +69,7 @@ private:
 private:
     asio::io_service& _io;
     asio::ip::udp::socket _socket;
-    asio::ip::udp::endpoint _remote_endpoint;
+    asio::ip::udp::endpoint _client_endpoint;
     int_buffer _receive_buffer;
 
     /// The set of active client_waiter objects.

@@ -28,7 +28,9 @@ set(NXUDP_SOURCES
         src/client_waiter.cpp
         src/int_buffer.h
         src/int_buffer.cpp
-        src/print_stream.h)
+        src/print_stream.h
+        src/client_info.cpp
+        src/client_info.h)
 
 
 if(WIN32)

@@ -74,7 +74,7 @@ void client_mode(const std::string& host_port, const std::string& milliseconds)
     std::string error;
     if(nxudp::utils::resolve_endpoint(io, host, port, remote_endpoint, &error))
     {
-        nxudp::client client(io, remote_endpoint, std::stoi(milliseconds));
+        nxudp::client client(io, nxudp::client_info(remote_endpoint, std::stoi(milliseconds)));
         io.run();
     }
     else

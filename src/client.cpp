@@ -29,19 +29,23 @@ void parse_response(const nxudp::client::receive_buffer &buffer, std::size_t byt
 
 
 client::client(asio::io_service& io,
-               const udp::endpoint& remote_endpoint,
-               int timeout) :
-    _socket(io, udp::endpoint(udp::v4(), 0)),
-    _remote_endpoint(remote_endpoint),
-    _timeout(timeout)
+               const client_info& client_info) :
+    _client_info(client_info),
+    _socket(io, udp::endpoint(udp::v4(), 0))
 {
-    send_timeout();
-    wait();
+    connect_to_server();
 }
 
 
 client::~client()
 {
+}
+
+void client::connect_to_server()
+{
+    auto func = std::bind(&client::async_connect_callback, this, std::placeholders::_1);
+
+    _socket.async_connect(server_endpoint(), func);
 }
 
 void client::send_timeout()
@@ -50,9 +54,9 @@ void client::send_timeout()
                           std::placeholders::_1,
                           std::placeholders::_2);
 
-    nxudp::utils::write_buffer(_timeout, _send_buffer);
+    nxudp::utils::write_buffer(timeout(), _send_buffer);
 
-   _socket.async_send_to(asio::buffer(_send_buffer), _remote_endpoint, func);
+   _socket.async_send(asio::buffer(_send_buffer), func);
 }
 
 void client::wait()
@@ -61,10 +65,22 @@ void client::wait()
                           std::placeholders::_1,
                           std::placeholders::_2);
 
-    _socket.async_receive_from(asio::buffer(_receive_buffer), _remote_endpoint, func);
+    _socket.async_receive(asio::buffer(_receive_buffer), func);
 }
 
-void client::async_send_callback(const asio::error_code &error, std::size_t bytes_transferred)
+void client::async_connect_callback(const asio::error_code &error)
+{
+    if(error)
+    {
+        print_stream(std::cerr) << "Error connecting to server: " << error << "\n";
+    }
+    else
+    {
+        send_timeout();
+    }
+}
+
+void client::async_send_callback(const asio::error_code &error, std::size_t)
 {
     if(error)
     {
@@ -72,8 +88,10 @@ void client::async_send_callback(const asio::error_code &error, std::size_t byte
     }
     else
     {
-        print_stream() << "Sent datagram with value \"" << _timeout << "\" to " << _remote_endpoint
+        print_stream() << "Sent datagram with value \"" << timeout() << "\" to " << server_endpoint()
                   << ".\nWaiting for response...\n";
+
+        wait();
     }
 }
 
@@ -87,9 +105,18 @@ void client::async_receive_callback(const asio::error_code &error, std::size_t b
     {
         std::string message;
         parse_response(_receive_buffer, bytes_transferred, message);
-        print_stream() << "Received response \"" << message << "\" from " << _remote_endpoint << ".\n";
+        print_stream() << "Received response \"" << message << "\" from " << server_endpoint() << ".\n";
     }
 }
 
+int client::timeout() const
+{
+    return _client_info.timeout();
+}
+
+const asio::ip::udp::endpoint& client::server_endpoint() const
+{
+    return _client_info.remote_endpoint();
+}
 
 }// namespace nxudp
