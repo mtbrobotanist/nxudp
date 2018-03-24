@@ -24,8 +24,7 @@ server::server(asio::io_service& io) :
 }
 
 server::~server()
-{
-}
+{ }
 
 void server::start_receive()
 {
@@ -49,11 +48,11 @@ void server::async_receive_callback(const asio::error_code &error, std::size_t b
     }
     else
     {
-        timed_session::ptr waiter = std::make_shared<timed_session>(*this, _io, session_data(_client_endpoint, timeout));
+        timed_session::ptr session = std::make_shared<timed_session>(*this, _io, session_data(_client_endpoint, timeout));
+        add_session(session);
 
-        add_waiter(waiter);
+        session->start();
 
-        waiter->start_wait();
         print_stream() << "Received request from " << _client_endpoint << " with value \"" << timeout << "\"\n";
     }
 
@@ -61,7 +60,7 @@ void server::async_receive_callback(const asio::error_code &error, std::size_t b
     start_receive();
 }
 
-void server::async_send_callback(const std::shared_ptr<timed_session> waiter,
+void server::async_send_callback(const std::shared_ptr<timed_session> session,
                                  const std::string &message,
                                  const asio::error_code &error,
                                  std::size_t /*bytes_transferred*/)
@@ -71,9 +70,9 @@ void server::async_send_callback(const std::shared_ptr<timed_session> waiter,
         print_stream(std::cerr) << "Error sending: " << error << "\n";
     }
 
-    remove_waiter(waiter);
+    remove_session(session);
 
-    print_stream() << "Sent response \"" << message << "\" to "<< waiter->client_endpoint() << "\n";
+    print_stream() << "Sent response \"" << message << "\" to "<< session->client_endpoint() << "\n";
 }
 
 bool server::parse_timeout(server::receive_buffer &buffer, size_t bytes_transferred, int &out_timeout)
@@ -88,7 +87,7 @@ bool server::parse_timeout(server::receive_buffer &buffer, size_t bytes_transfer
     return true;
 }
 
-void server::end_session(const std::shared_ptr<timed_session>& session)
+void server::end_session(const timed_session::ptr& session)
 {
     auto func = std::bind(&server::async_send_callback, this,
                             session,
@@ -101,16 +100,16 @@ void server::end_session(const std::shared_ptr<timed_session>& session)
     _socket.async_send_to(asio::buffer(_RESPONSE), session->client_endpoint(), func);
 }
 
-void server::add_waiter(const std::shared_ptr<timed_session>& waiter)
+void server::add_session(const timed_session::ptr& session)
 {
-    std::lock_guard<std::mutex> lock(_waiters_mutex);
-    _waiters.insert(waiter);
+    std::lock_guard<std::mutex> lock(_session_mutex);
+    _sessions.insert(session);
 }
 
-void server::remove_waiter(const std::shared_ptr<timed_session>& waiter)
+void server::remove_session(const timed_session::ptr& session)
 {
-    std::lock_guard<std::mutex> lock(_waiters_mutex);
-    _waiters.erase(waiter);
+    std::lock_guard<std::mutex> lock(_session_mutex);
+    _sessions.erase(session);
 }
 
 }// namespace nxudp

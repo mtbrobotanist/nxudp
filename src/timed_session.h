@@ -33,7 +33,7 @@ public:
     const asio::ip::udp::endpoint& client_endpoint() const;
 
     /// Starts the count down to trigger a response. Called by the owning server object.
-    void start_wait();
+    void start();
 
 private:
 

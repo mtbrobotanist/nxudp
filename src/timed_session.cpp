@@ -30,7 +30,7 @@ void timed_session::async_timer_callback(const asio::error_code& error)
     _server.end_session(shared_from_this());
 }
 
-void timed_session::start_wait()
+void timed_session::start()
 {
     _timer.async_wait(
             std::bind(&timed_session::async_timer_callback, this, std::placeholders::_1));

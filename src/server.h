@@ -38,11 +38,11 @@ private:
 
     /// The callback used by _socket.async_send_to().
     /// Erases the given client_waiter after a response has been sent to it's endpoint.
-    /// @param [in] waiter - the waiter to remove from the server's list of active waiters.
+    /// @param [in] session - the waiter to remove from the server's list of active waiters.
     /// @param [in] message - the message to send over the socket to the waiter's endpoint.
     /// @param [in] error - provided by asio, An error code if one occured during the send operation.
     /// @param [in] bytes_transferred - provided by asio, the number of bytes sent out on the socket.
-    void async_send_callback(const std::shared_ptr<timed_session> waiter,
+    void async_send_callback(const std::shared_ptr<timed_session> session,
                              const std::string &message,
                              const asio::error_code &error,
                              std::size_t bytes_transferred);
@@ -61,10 +61,10 @@ private:
     void async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred);
 
     /// adds a client waiter from the maps
-    void add_waiter(const std::shared_ptr<timed_session>& waiter);
+    void add_session(const std::shared_ptr<timed_session>& session);
 
     /// removes a client_waiter from the map
-    void remove_waiter(const std::shared_ptr<timed_session>& waiter);
+    void remove_session(const std::shared_ptr<timed_session>& session);
 
 private:
     asio::io_service& _io;
@@ -73,9 +73,9 @@ private:
     int_buffer _receive_buffer;
 
     /// The set of active client_waiter objects.
-    std::unordered_set<std::shared_ptr<timed_session>> _waiters;
+    std::unordered_set<std::shared_ptr<timed_session>> _sessions;
 
-    std::mutex _waiters_mutex;
+    std::mutex _session_mutex;
 
     std::mutex _socket_mutex;
 };
