@@ -111,15 +111,14 @@ void server::timeout_received(int timeout, const asio::ip::udp::endpoint& client
 
     session->start();
 
-    print_stream() << "Received request from " << client_endpoint << " with value \"" << timeout << "\"\n";
+    print_stream() << "Received request from " << client_endpoint << " with value \"" << timeout << "\"" << std::endl;
 }
 
 void server::response_sent(const std::shared_ptr<timed_session>& session, const std::string& message)
 {
     remove_session(session);
 
-    print_stream() << "Sent response \"" << message << "\" to "<< session->client_endpoint() << "\n";
+    print_stream() << "Sent response \"" << message << "\" to "<< session->client_endpoint() << std::endl;
 }
-
 
 }// namespace nxudp
