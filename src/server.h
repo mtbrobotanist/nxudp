@@ -16,6 +16,8 @@ namespace nxudp
 
     class timed_session;
 
+    /// This class is responsible for waiting for input on a socket, parsing the timeout, and constructing timed sessions.
+    /// when a timed session expires, it sends a reponse back to the client that initiated the timed session.
 class NXUDP_API server : network_object
 {
     const std::string _RESPONSE = "DONE";
@@ -30,7 +32,6 @@ public:
 	/// Called by the given waiter to when it's timeout has completed.
     /// @param [in] session - the waiter that whose timer has expired.
     void end_session(const std::shared_ptr<timed_session>& session);
-
 private:
 
     /// The callback used by _socket.async_send_to().
