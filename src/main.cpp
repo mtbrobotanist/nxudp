@@ -1,10 +1,10 @@
 #include <regex>
 #include <asio.hpp>
+#include <csignal>
 #include "program_options.h"
 #include "endpoint_utils.h"
 #include "client.h"
 #include "server.h"
-#include "session_data.h"
 #include "print_stream.h"
 
 
