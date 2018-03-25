@@ -1,4 +1,3 @@
-#include <iostream>
 #include <regex>
 #include <asio.hpp>
 #include "program_options.h"
@@ -35,31 +34,6 @@ void help()
     nxudp::print_stream() << help << "\n";
 }
 
-
-/**
- * Note multi threading really isn't needed here.
- * The server runs fine with a single thread because it
- * uses async functions. I did this for fun.
- */
-void run_server_mode_threads(asio::io_service& io)
-{
-    unsigned cpu_count =
-            std::max<unsigned>(std::thread::hardware_concurrency(), 1);
-
-    std::vector<std::thread> threads;
-    threads.reserve(cpu_count);
-
-    for(int i = 0; i < cpu_count; ++i)
-    {
-        threads.push_back(std::thread([&io](){ io.run(); }));
-    }
-
-    for(std::thread& t : threads)
-    {
-        t.join();
-    }
-}
-
 void server_mode()
 {
     running_server = true;
@@ -67,7 +41,7 @@ void server_mode()
     io = std::make_shared<asio::io_service>();
     nxudp::server server(*io);
 
-    run_server_mode_threads(*io);
+    io->run();
 }
 
 
