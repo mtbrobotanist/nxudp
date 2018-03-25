@@ -14,14 +14,11 @@
 namespace nxudp
 {
 
-class timed_session;
-
+    class timed_session;
 
 class NXUDP_API server : network_object
 {
     const std::string _RESPONSE = "DONE";
-
-    typedef int_buffer receive_buffer;
 
 public:
     /// The Constructor for the server object.
@@ -42,7 +39,7 @@ private:
     /// @param [in] message - the message to send over the socket to the waiter's endpoint.
     /// @param [in] error - provided by asio, An error code if one occured during the send operation.
     /// @param [in] bytes_transferred - provided by asio, the number of bytes sent out on the socket.
-    void async_send_callback(const std::shared_ptr<timed_session> session,
+    void async_send_callback(const std::shared_ptr<timed_session>& session,
                              const std::string &message,
                              const asio::error_code &error,
                              std::size_t bytes_transferred);
@@ -52,30 +49,42 @@ private:
     /// @param[in] size_t bytes_transferred, the number of bytes transferred transferred into @param buffer.
     /// @param[out] out_timeout - a reference to an integer that will contain the timeout value.
     /// @returns bool - the result of the conversion. true, if successful, false otherwise
-    bool parse_timeout(receive_buffer &buffer, size_t bytes_transferred, int &out_timeout);
+    bool parse_timeout(int_buffer &buffer, size_t bytes_transferred, int &out_timeout);
 
-    /// The function that calls async_receive_from on the socket, specifying async_receive_callback() as the future function.
+    /// The function that calls async_receive_from() on the socket, specifying async_receive_callback() as the future function.
     void start_receive();
 
-    /// the callback funciton,called by asio, on completion of the socket's async_receive_from function.
+    /// The callback funciton,called by asio, on completion of the socket's async_receive_from() function.
+    /// @param[in] error - the asio error code, provided by asio.
+    /// @param[in] bytes_transferred - the number of bytes written to the socket, provided by asio.
     void async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred);
 
-    /// adds a client waiter from the maps
+    /// Adds a timed_session to the sever, which will eventually send a response back to the client on the session's behalf
+    /// @param[in] session - the session to add.
     void add_session(const std::shared_ptr<timed_session>& session);
 
-    /// removes a client_waiter from the map
+    /// Removes a client_waiter from the map
+    /// @param[in] session - the session to remove.
     void remove_session(const std::shared_ptr<timed_session>& session);
 
+    /// Get the current client endpoint as determined by the most recent client packet received
     asio::ip::udp::endpoint& client_endpoint();
+
+    /// Executed when the server receives a timeout from a client
+    /// @param[in] timeout - the timeout received from a client
+    /// @param[in] client_endpoint - the client_endpoint associated with the timeout
+    void timeout_received(int timeout, const asio::ip::udp::endpoint& client_endpoint);
+
+
+    /// Executed when the server has sent a response to the client represented by the given session
+    /// @param[in] session - the timed_session representing the client
+    void response_sent(const std::shared_ptr<timed_session>& session, const std::string& message);
+
 private:
     asio::io_service& _io;
 
     /// The set of active client_waiter objects.
     std::unordered_set<std::shared_ptr<timed_session>> _sessions;
-
-    std::mutex _session_mutex;
-
-    std::mutex _socket_mutex;
 };
 
 }// namespace nxudp

@@ -18,8 +18,6 @@ class NXUDP_API timed_session : public std::enable_shared_from_this<timed_sessio
 
 public:
 
-    typedef std::shared_ptr<timed_session> ptr;
-
     /// Constructs a client_waiter object.
     /// @param[in] io - the asio::io_service required to run the client_waiter timer.
     /// @param[in] remote_endpoint - the endpoint of the client that this client_waiter represents.

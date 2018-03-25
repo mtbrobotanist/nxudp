@@ -2,7 +2,6 @@
 // Created by n8 on 3/16/18.
 //
 
-#include <iostream>
 #include "server.h"
 #include "print_stream.h"
 #include "timed_session.h"
@@ -32,8 +31,6 @@ void server::start_receive()
                           std::placeholders::_1,
                           std::placeholders::_2);
 
-    std::lock_guard<std::mutex> lock(_socket_mutex);
-
     // this sets the value of _client_endpoint when the before invoking the callback function
     _socket.async_receive_from(asio::buffer(_timeout_buffer), client_endpoint(), func);
 }
@@ -48,20 +45,14 @@ void server::async_receive_callback(const asio::error_code &error, std::size_t b
     }
     else
     {
-        timed_session::ptr session = std::make_shared<timed_session>(*this, _io, session_data(client_endpoint(), timeout));
-
-        add_session(session);
-
-        session->start();
-
-        print_stream() << "Received request from " << client_endpoint() << " with value \"" << timeout << "\"\n";
+        timeout_received(timeout, client_endpoint());
     }
 
     // we want to continue listening for other clients even if there was an error
     start_receive();
 }
 
-void server::async_send_callback(const std::shared_ptr<timed_session> session,
+void server::async_send_callback(const std::shared_ptr<timed_session>& session,
                                  const std::string &message,
                                  const asio::error_code &error,
                                  std::size_t /*bytes_transferred*/)
@@ -71,12 +62,10 @@ void server::async_send_callback(const std::shared_ptr<timed_session> session,
         print_stream(std::cerr) << "Error sending: " << error << "\n";
     }
 
-    remove_session(session);
-
-    print_stream() << "Sent response \"" << message << "\" to "<< session->client_endpoint() << "\n";
+    response_sent(session, message);
 }
 
-bool server::parse_timeout(server::receive_buffer &buffer, size_t bytes_transferred, int &out_timeout)
+bool server::parse_timeout(int_buffer &buffer, size_t bytes_transferred, int &out_timeout)
 {
     if(bytes_transferred < sizeof(int))
     {
@@ -88,7 +77,7 @@ bool server::parse_timeout(server::receive_buffer &buffer, size_t bytes_transfer
     return true;
 }
 
-void server::end_session(const timed_session::ptr& session)
+void server::end_session(const std::shared_ptr<timed_session>& session)
 {
     auto func = std::bind(&server::async_send_callback, this,
                             session,
@@ -96,26 +85,40 @@ void server::end_session(const timed_session::ptr& session)
                             std::placeholders::_1,
                             std::placeholders::_2);
 
-    std::lock_guard<std::mutex> lock(_socket_mutex);
-
     _socket.async_send_to(asio::buffer(_RESPONSE), session->client_endpoint(), func);
 }
 
-void server::add_session(const timed_session::ptr& session)
+void server::add_session(const std::shared_ptr<timed_session>& session)
 {
-    std::lock_guard<std::mutex> lock(_session_mutex);
     _sessions.insert(session);
 }
 
-void server::remove_session(const timed_session::ptr& session)
+void server::remove_session(const std::shared_ptr<timed_session>& session)
 {
-    std::lock_guard<std::mutex> lock(_session_mutex);
     _sessions.erase(session);
 }
 
 asio::ip::udp::endpoint& server::client_endpoint()
 {
     return _remote_endpoint;
+}
+
+void server::timeout_received(int timeout, const asio::ip::udp::endpoint& client_endpoint)
+{
+    std::shared_ptr<timed_session> session = std::make_shared<timed_session>(*this, _io, session_data(client_endpoint, timeout));
+
+    add_session(session);
+
+    session->start();
+
+    print_stream() << "Received request from " << client_endpoint << " with value \"" << timeout << "\"\n";
+}
+
+void server::response_sent(const std::shared_ptr<timed_session>& session, const std::string& message)
+{
+    remove_session(session);
+
+    print_stream() << "Sent response \"" << message << "\" to "<< session->client_endpoint() << "\n";
 }
 
 
