@@ -8,6 +8,20 @@
 #include "session_data.h"
 #include "print_stream.h"
 
+
+std::shared_ptr<asio::io_service> io;
+bool running_server = false;
+
+
+void signal_handler(int signal)
+{
+    io->stop();
+
+    std::string stop_message = running_server ? "Stopping server." : "Stopping client.";
+
+    nxudp::print_stream() << stop_message << std::endl;
+}
+
 void help()
 {
     std::string help = "Usage:\n";
@@ -48,10 +62,12 @@ void run_server_mode_threads(asio::io_service& io)
 
 void server_mode()
 {
-    asio::io_service io;
-    nxudp::server server(io);
+    running_server = true;
 
-    run_server_mode_threads(io);
+    io = std::make_shared<asio::io_service>();
+    nxudp::server server(*io);
+
+    run_server_mode_threads(*io);
 }
 
 
@@ -65,18 +81,20 @@ void get_host_and_port(const std::string& host_port, std::string& host, std::str
 
 void client_mode(const std::string& host_port, const std::string& milliseconds)
 {
+    running_server = false;
+
     std::string host;
     std::string port;
     get_host_and_port(host_port, host, port);
 
-    asio::io_service io;
+    io = std::make_shared<asio::io_service>();
     asio::ip::udp::endpoint server_endpoint;
 
     std::string error;
-    if(nxudp::utils::resolve_endpoint(io, host, port, server_endpoint, &error))
+    if(nxudp::utils::resolve_endpoint(*io, host, port, server_endpoint, &error))
     {
-        nxudp::client client(io, nxudp::session_data(server_endpoint, std::stoi(milliseconds)));
-        io.run();
+        nxudp::client client(*io, server_endpoint, std::stoi(milliseconds));
+        io->run();
     }
     else
     {
@@ -89,12 +107,14 @@ void add_command_line_validation(nxudp::program_options& options)
     options.add_validation("-s", std::regex()); // standalone server flag;
 
     options.add_validation("-c", std::regex("([^,]*):\\d+")); // [host-name | ip-address]:port combination
-    
-    options.add_validation("-n", std::regex("\\d+"));
+
+    options.add_validation("-n", std::regex("\\d+")); // millisecond count
 }
 
 int main(int argc, char* argv[])
 {
+    std::signal(SIGINT, signal_handler);
+
     nxudp::program_options options(argc, argv);
     
     add_command_line_validation(options);

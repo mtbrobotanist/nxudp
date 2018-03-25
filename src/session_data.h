@@ -8,9 +8,9 @@
 #include <asio.hpp>
 #include "export.h"
 
-/// this class represents the timer session information in either the client context or the server context
+/// This class represents the timer session information in either the client context or the server context
 ///  - timeout
-///  - ip:port information for a remote endpoint. Interpreted by the user of the class.
+///  - ip:port information for a remote endpoint.
 
 namespace nxudp
 {
@@ -26,7 +26,7 @@ struct NXUDP_API session_data
             remote_endpoint(other.remote_endpoint)
     { }
 
-    /// The remote endpoint of either the client or the server, depending on where the client_data was instantiated.
+    /// The remote endpoint of either the client or the server, depending on where the _data was instantiated.
     asio::ip::udp::endpoint remote_endpoint;
 
     /// The timeout, in milliseconds

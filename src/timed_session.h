@@ -34,7 +34,6 @@ public:
 
     /// Starts the count down to trigger a response. Called by the owning server object.
     void start();
-
 private:
 
     /// The callback used by _timer.async_wait().

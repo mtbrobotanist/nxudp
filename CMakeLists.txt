@@ -29,7 +29,9 @@ set(NXUDP_SOURCES
         src/int_buffer.h
         src/int_buffer.cpp
         src/print_stream.h
-        src/session_data.h)
+        src/session_data.h
+        src/network_object.cpp
+        src/network_object.h)
 
 
 if(WIN32)

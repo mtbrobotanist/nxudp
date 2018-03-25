@@ -14,8 +14,8 @@ namespace nxudp
 using asio::ip::udp;
 
 server::server(asio::io_service& io) :
-    _io(io),
-    _socket(io, udp::endpoint(udp::v4(), 0))
+    network_object(io),
+    _io(io)
 {
     unsigned short port = _socket.local_endpoint().port();
     print_stream() << "Listening port " << port << "\n";
@@ -35,25 +35,26 @@ void server::start_receive()
     std::lock_guard<std::mutex> lock(_socket_mutex);
 
     // this sets the value of _client_endpoint when the before invoking the callback function
-    _socket.async_receive_from(asio::buffer(_receive_buffer), _client_endpoint, func);
+    _socket.async_receive_from(asio::buffer(_timeout_buffer), client_endpoint(), func);
 }
 
 void server::async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred)
 {
     int timeout;
-    if (error || !parse_timeout(_receive_buffer, bytes_transferred, timeout))
+    if (error || !parse_timeout(_timeout_buffer, bytes_transferred, timeout))
     {
-        print_stream(std::cerr) << "The server received an invalid timeout from client: "<< _client_endpoint
-                  << ". Ignoring...\n";
+        print_stream(std::cerr) << "The server received an invalid timeout from client: "<< client_endpoint()
+                                << ". Ignoring...\n";
     }
     else
     {
-        timed_session::ptr session = std::make_shared<timed_session>(*this, _io, session_data(_client_endpoint, timeout));
+        timed_session::ptr session = std::make_shared<timed_session>(*this, _io, session_data(client_endpoint(), timeout));
+
         add_session(session);
 
         session->start();
 
-        print_stream() << "Received request from " << _client_endpoint << " with value \"" << timeout << "\"\n";
+        print_stream() << "Received request from " << client_endpoint() << " with value \"" << timeout << "\"\n";
     }
 
     // we want to continue listening for other clients even if there was an error
@@ -75,7 +76,7 @@ void server::async_send_callback(const std::shared_ptr<timed_session> session,
     print_stream() << "Sent response \"" << message << "\" to "<< session->client_endpoint() << "\n";
 }
 
-bool server::parse_timeout(server::receive_buffer &buffer, size_t bytes_transferred, int &out_timeout)
+bool server::parse_timeout(int_buffer &buffer, size_t bytes_transferred, int &out_timeout)
 {
     if(bytes_transferred < sizeof(int))
     {
@@ -111,5 +112,11 @@ void server::remove_session(const timed_session::ptr& session)
     std::lock_guard<std::mutex> lock(_session_mutex);
     _sessions.erase(session);
 }
+
+asio::ip::udp::endpoint& server::client_endpoint()
+{
+    return _remote_endpoint;
+}
+
 
 }// namespace nxudp

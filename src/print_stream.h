@@ -6,7 +6,6 @@
 #define NXUDP_PRINT_STREAM_H
 
 #include <sstream>
-#include <mutex>
 #include <iostream>
 #include "export.h"
 
