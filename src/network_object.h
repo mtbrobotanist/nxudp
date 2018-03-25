@@ -16,8 +16,6 @@ namespace nxudp
 
 class NXUDP_API network_object
 {
-public:
-    typedef std::array<char, 128> message_buffer;
 
 public:
     network_object(asio::io_service& io);
@@ -28,7 +26,6 @@ protected:
     asio::ip::udp::endpoint _remote_endpoint;
 
     int_buffer _timeout_buffer;
-    message_buffer _message_buffer;
 };
 
 }

@@ -26,7 +26,7 @@ class NXUDP_API client : network_object
 public:
     
     typedef int_buffer send_buffer;
-    typedef message_buffer receive_buffer;
+    typedef std::array<char, 128> message_buffer;
 
 public:
     /// Constructs a client that will send the timeout.
@@ -67,7 +67,7 @@ private:
     /// @param[in] buffer - the buffer whose contents to convert, typically filled in by the socket itself.
     /// @param[in] bytes_transferred - the number of bytes transferred to the socket.
     /// @param[out] out_message - the string that will be assigned the parsed contents of the buffer
-    void parse_response(const nxudp::client::receive_buffer &buffer, std::size_t bytes_transferred,
+    void parse_response(const message_buffer &buffer, std::size_t bytes_transferred,
                         std::string& out_message);
 
     /// get the endpoint of the server this client is connected to.
@@ -79,6 +79,8 @@ private:
 private:
 
     int _timeout;
+    message_buffer _message_buffer;
+
 };
 
 }// namespace nxudp
