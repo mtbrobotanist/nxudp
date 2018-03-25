@@ -76,7 +76,7 @@ void server::async_send_callback(const std::shared_ptr<timed_session> session,
     print_stream() << "Sent response \"" << message << "\" to "<< session->client_endpoint() << "\n";
 }
 
-bool server::parse_timeout(int_buffer &buffer, size_t bytes_transferred, int &out_timeout)
+bool server::parse_timeout(server::receive_buffer &buffer, size_t bytes_transferred, int &out_timeout)
 {
     if(bytes_transferred < sizeof(int))
     {

@@ -21,6 +21,8 @@ class NXUDP_API server : network_object
 {
     const std::string _RESPONSE = "DONE";
 
+    typedef int_buffer receive_buffer;
+
 public:
     /// The Constructor for the server object.
     /// @param[in] io - the asio::io_service object required to run the server's socket.
@@ -50,7 +52,7 @@ private:
     /// @param[in] size_t bytes_transferred, the number of bytes transferred transferred into @param buffer.
     /// @param[out] out_timeout - a reference to an integer that will contain the timeout value.
     /// @returns bool - the result of the conversion. true, if successful, false otherwise
-    bool parse_timeout(int_buffer &buffer, size_t bytes_transferred, int &out_timeout);
+    bool parse_timeout(receive_buffer &buffer, size_t bytes_transferred, int &out_timeout);
 
     /// The function that calls async_receive_from on the socket, specifying async_receive_callback() as the future function.
     void start_receive();

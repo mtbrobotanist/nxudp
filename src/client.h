@@ -26,7 +26,7 @@ class NXUDP_API client : network_object
 public:
     
     typedef int_buffer send_buffer;
-    typedef std::array<char , 128> receive_buffer;
+    typedef message_buffer receive_buffer;
 
 public:
     /// Constructs a client that will send the timeout.

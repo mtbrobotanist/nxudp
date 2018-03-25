@@ -94,7 +94,7 @@ void client::async_receive_callback(const asio::error_code &error, std::size_t b
 
 }
 
-void client::parse_response(const nxudp::client::receive_buffer &buffer,
+void client::parse_response(const client::receive_buffer &buffer,
                             std::size_t bytes_transferred,
                             std::string& out_message)
 {
