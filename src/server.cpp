@@ -17,7 +17,7 @@ server::server(asio::io_service& io) :
     _io(io)
 {
     unsigned short port = _socket.local_endpoint().port();
-    print_stream() << "Listening port " << port << "\n";
+    print_stream() << "Listening port " << port << std::endl;
 
     start_receive();
 }
