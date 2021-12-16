@@ -23,7 +23,7 @@ client::client(asio::io_service& io, const asio::ip::udp::endpoint& server_endpo
 
 client::~client()
 {
-    print_stream() << "Exiting..." << std::endl;
+    stdcout() << "Exiting..." << std::endl;
 }
 
 void client::connect_to_server()
@@ -33,7 +33,7 @@ void client::connect_to_server()
         [this](const asio::error_code &error)
         {
             if(error)
-                print_stream(std::cerr) << "Error connecting to server: " << error << "\n";
+                stdcerr() << "Error connecting to server: " << error << "\n";
             else
                 send_timeout();
         });
@@ -49,11 +49,11 @@ void client::send_timeout()
         {
             if(error)
             {
-                print_stream(std::cerr) << "Error sending: " << error << "\n";
+                stdcerr() << "Error sending: " << error << "\n";
             }
             else
             {
-                print_stream() << "Sent datagram with value \"" << _timeout << "\" to " << _server_endpoint
+                stdcout() << "Sent datagram with value \"" << _timeout << "\" to " << _server_endpoint
                         << ".\nWaiting for response...\n";
 
                 wait();
@@ -68,9 +68,9 @@ void client::wait()
         [this](const asio::error_code &error, std::size_t bytes_transferred)
         {
             if (error)
-                print_stream(std::cerr) << "Error receiving:" << error << "\n";
+                stdcerr() << "Error receiving:" << error << "\n";
             else
-                print_stream() << "Received response \"" << _message_buffer << "\" from " << _server_endpoint << ".\n";
+                stdcout() << "Received response \"" << _message_buffer << "\" from " << _server_endpoint << ".\n";
         });
 }
 

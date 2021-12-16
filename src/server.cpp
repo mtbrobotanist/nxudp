@@ -19,7 +19,7 @@ server::server(asio::io_service& io) :
     _socket(io, udp::endpoint(udp::v4(), 0))
 {
     unsigned short port = _socket.local_endpoint().port();
-    print_stream() << "Listening port " << port << std::endl;
+    stdcout() << "Listening port " << port << std::endl;
 
     start_receive();
 }
@@ -38,7 +38,7 @@ void server::start_receive()
         {
             if (error)
             {
-                print_stream(std::cerr) << "Got an error while waiting for client connection" << error << std::endl;
+                stdcerr() << "Got an error while waiting for client connection" << error << std::endl;
                 // we want to continue listening for other clients even if there was an error
                 return start_receive();
             }
@@ -46,12 +46,12 @@ void server::start_receive()
             int timeout;
             if (!parse_timeout(session->timeout_buffer, bytes_transferred, timeout))
             {
-                print_stream(std::cerr) << "Got an invalid timeout: " << session->timeout_buffer.data() << std::endl;
+                stdcerr() << "Got an invalid timeout: " << session->timeout_buffer.data() << std::endl;
                 return start_receive();
             }
 
             session->timer = std::make_unique<asio::steady_timer>(_io, std::chrono::milliseconds(timeout));
-            print_stream() << "Received request from " << session->client_endpoint << " with value \"" << timeout << "\"" << std::endl;
+            stdcout() << "Received request from " << session->client_endpoint << " with value \"" << timeout << "\"" << std::endl;
             start_session(std::move(session));
 
             start_receive();
@@ -78,9 +78,9 @@ void server::end_session(client_session *session)
         [this, session](const asio::error_code& error, std::size_t)
         {
             if (error)
-                print_stream(std::cerr) << "Error while sending response to client " << session->client_endpoint << std::endl;
+                stdcerr() << "Error while sending response to client " << session->client_endpoint << std::endl;
             else
-                print_stream() << "Sent response \"" << _RESPONSE << "\" to " << session->client_endpoint << std::endl;
+                stdcout() << "Sent response \"" << _RESPONSE << "\" to " << session->client_endpoint << std::endl;
 
             _sessions.erase(session);
         });
@@ -95,7 +95,7 @@ void server::start_session(std::unique_ptr<client_session> session)
         [this, session_ptr](const asio::error_code& error)
         {
             if (error)
-                print_stream(std::cerr) << "Error during timed wait: " << error << "\n";
+                stdcerr() << "Error during timed wait: " << error << "\n";
 
             end_session(session_ptr);
         });

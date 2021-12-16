@@ -12,6 +12,8 @@
 namespace nxudp
 {
 
+namespace detail {
+
 class NXUDP_API print_stream : public std::ostringstream
 {
 public:
@@ -25,6 +27,20 @@ public:
 
 private:
     std::ostream& _os;
+};
+
+} // detail
+
+class NXUDP_API stdcout: public detail::print_stream
+{
+public:
+    stdcout(): print_stream(std::cout){ }
+};
+
+class NXUDP_API stdcerr: public detail::print_stream
+{
+public:
+    stdcerr(): print_stream(std::cerr){ }
 };
 
 }
