@@ -1,6 +1,8 @@
+#include <memory>
 #include <regex>
 #include <asio.hpp>
 #include <csignal>
+#include "asio/io_service.hpp"
 #include "program_options.h"
 #include "endpoint_utils.h"
 #include "client.h"
@@ -38,16 +40,14 @@ void server_mode()
 {
     running_server = true;
 
-    io = std::make_shared<asio::io_service>();
     nxudp::server server(*io);
 
     io->run();
 }
 
-
 void get_host_and_port(const std::string& host_port, std::string& host, std::string& port)
 {
-    int colon = host_port.find(":");
+    std::size_t colon = host_port.find(":");
 
     host = host_port.substr(0, colon);
     port = host_port.substr(colon + 1);
@@ -61,7 +61,6 @@ void client_mode(const std::string& host_port, const std::string& milliseconds)
     std::string port;
     get_host_and_port(host_port, host, port);
 
-    io = std::make_shared<asio::io_service>();
     asio::ip::udp::endpoint server_endpoint;
 
     std::string error;
@@ -72,7 +71,7 @@ void client_mode(const std::string& host_port, const std::string& milliseconds)
     }
     else
     {
-        nxudp::print_stream() << error << "\n";
+        nxudp::print_stream(std::cerr) << error << "\n";
     }
 }
 
@@ -87,28 +86,27 @@ void add_command_line_validation(nxudp::program_options& options)
 
 int main(int argc, char* argv[])
 {
+    io = std::make_shared<asio::io_service>();
     std::signal(SIGINT, signal_handler);
 
     nxudp::program_options options(argc, argv);
-    
     add_command_line_validation(options);
-    
-    std::string host_port;
-    std::string msec;
 
-    if(options.get_value("-c", host_port) && options.get_value("-n", msec)
-       && options.validate("-c", host_port) && options.validate("-n", msec))
-    {
-        client_mode(host_port, msec);
-    }
-    else if(options.flag_exists("-s"))
-    {
-        server_mode();
-    }
-    else
+    // server mode must have no other flags or values.
+    if (options.flag_exists("-s") && options.size() > 1)
     {
         help();
+        return 0;
     }
+
+    std::string host_port;
+    std::string msec;
+    if(options.validate("-c", &host_port) && options.validate("-n", &msec))
+        client_mode(host_port, msec);
+    else if(options.flag_exists("-s") && !options.get_value("-s")) //< -s should not have value, it may be a mistake e.g. user entered -s localhost:12345.
+        server_mode();
+    else
+     help();
 
     return 0;
 }

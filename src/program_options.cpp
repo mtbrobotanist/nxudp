@@ -2,37 +2,28 @@
 
 namespace nxudp
 {
-    
-program_options::program_options(int &argc, char **argv)
+
+program_options::program_options(int argc, char **argv)
 {
     if(argc > 1)
     {
         _tokens.reserve(argc - 1);
 
-        for (int i = 1; i < argc; ++i)
+        for(int i = 1; i < argc; ++i)
             _tokens.push_back(std::string(argv[i]));
     }
 }
 
-
-program_options::~program_options()
+bool program_options::get_value(const std::string &flag, std::string *out_value) const
 {
+    auto itr = std::find(_tokens.begin(), _tokens.end(), flag);
+    if(itr == _tokens.end() || ++itr == _tokens.end())
+        return false;
 
-}
-    
-bool program_options::get_value(const std::string &flag, std::string &out_value) const
-{
-    std::vector<std::string>::const_iterator itr;
-    itr = std::find(_tokens.begin(), _tokens.end(), flag);
+    if(out_value)
+        *out_value = *itr;
 
-    if (itr != _tokens.end())
-    {
-        out_value = ++itr != _tokens.end() ? *itr : std::string();
-        return true;
-    }
-    
-    out_value = std::string();
-    return false;
+    return true;
 }
 
 bool program_options::flag_exists(const std::string& flag) const
@@ -42,7 +33,12 @@ bool program_options::flag_exists(const std::string& flag) const
 
 bool program_options::empty() const
 {
-    return _tokens.size() == 0;
+    return _tokens.empty();
+}
+
+std::size_t program_options::size() const
+{
+    return _tokens.size();
 }
 
 void program_options::add_validation(const std::string& flag, const std::regex& regex)
@@ -54,11 +50,24 @@ bool program_options::validate(const std::string& flag, const std::string& value
 {
     const auto& flag_regex = _options.find(flag);
     if(flag_regex == _options.end()) // no such option specified
-    {
         return false;
-    }
-    
+
     return std::regex_match(value, flag_regex->second);
 }
 
+bool program_options::validate(const std::string& flag, std::string* out_value) const
+{
+    std::string value;
+    if(!get_value(flag, &value))
+        return false;
+
+    if(!validate(flag, value))
+        return false;
+
+    if(out_value)
+        *out_value = std::move(value);
+
+    return true;
 }
+
+} // nxudp
