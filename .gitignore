@@ -8,12 +8,13 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 
-
-*build*
+.cache
+build
 
 
 #IDE
 
-\.idea
-\.vs/
-\nbproject
+.idea
+.vs
+nbproject
+.vscode
