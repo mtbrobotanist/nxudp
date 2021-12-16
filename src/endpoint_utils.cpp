@@ -1,8 +1,8 @@
 
-/* 
+/*
  * File:   endpoint_utils.cpp
  * Author: n8
- * 
+ *
  * Created on March 19, 2018, 6:30 PM
  */
 
@@ -10,10 +10,10 @@
 
 namespace nxudp
 {
-namespace utils 
-{    
+namespace utils
+{
 
-using asio::ip::udp;    
+using asio::ip::udp;
 
 bool resolve_endpoint(asio::io_service& io, const std::string& host, const std::string& port, udp::endpoint& out_endpoint, std::string* out_error)
 {
@@ -29,7 +29,7 @@ bool resolve_endpoint(asio::io_service& io, const std::string& host, const std::
         {
             *out_error= "Invalid host:port combination provided." + host + ":" + port;
         }
-        
+
         return false;
     }
 
@@ -39,7 +39,7 @@ bool resolve_endpoint(asio::io_service& io, const std::string& host, const std::
         {
             *out_error = "No matching host:port combination found.";
         }
-        
+
         return false;
     }
 

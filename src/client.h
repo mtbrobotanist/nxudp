@@ -9,9 +9,7 @@
 
 #include <iostream>
 #include <array>
-#include "session_data.h"
 #include "int_buffer.h"
-#include "session_data.h"
 #include "export.h"
 #include "network_object.h"
 
@@ -24,7 +22,7 @@ class NXUDP_API client : network_object
 {
 
 public:
-    
+
     typedef int_buffer send_buffer;
     typedef std::array<char, 128> message_buffer;
 

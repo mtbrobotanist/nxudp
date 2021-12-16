@@ -3,9 +3,11 @@
 //
 
 #include "server.h"
+#include "asio/error_code.hpp"
+#include "asio/ip/udp.hpp"
+#include "asio/steady_timer.hpp"
 #include "print_stream.h"
-#include "timed_session.h"
-
+#include <memory>
 
 namespace nxudp
 {
@@ -13,8 +15,8 @@ namespace nxudp
 using asio::ip::udp;
 
 server::server(asio::io_service& io) :
-    network_object(io),
-    _io(io)
+    _io(io),
+    _socket(io, udp::endpoint(udp::v4(), 0))
 {
     unsigned short port = _socket.local_endpoint().port();
     print_stream() << "Listening port " << port << std::endl;
@@ -27,42 +29,33 @@ server::~server()
 
 void server::start_receive()
 {
-    auto func = std::bind(&server::async_receive_callback, this,
-                          std::placeholders::_1,
-                          std::placeholders::_2);
+    auto session = std::make_unique<client_session>();
+    auto session_ptr = session.get();
+    _socket.async_receive_from(
+        asio::buffer(session_ptr->timeout_buffer),
+        session_ptr->client_endpoint,
+        [this, session = std::move(session)](const asio::error_code &error, std::size_t bytes_transferred) mutable
+        {
+            if (error)
+            {
+                print_stream(std::cerr) << "Got an error while waiting for client connection" << error << std::endl;
+                // we want to continue listening for other clients even if there was an error
+                return start_receive();
+            }
 
-    // this sets the value of _client_endpoint when the before invoking the callback function
-    _socket.async_receive_from(asio::buffer(_timeout_buffer), client_endpoint(), func);
-}
+            int timeout;
+            if (!parse_timeout(session->timeout_buffer, bytes_transferred, timeout))
+            {
+                print_stream(std::cerr) << "Got an invalid timeout: " << session->timeout_buffer.data() << std::endl;
+                return start_receive();
+            }
 
-void server::async_receive_callback(const asio::error_code &error, std::size_t bytes_transferred)
-{
-    int timeout;
-    if (error || !parse_timeout(_timeout_buffer, bytes_transferred, timeout))
-    {
-        print_stream(std::cerr) << "The server received an invalid timeout from client: "<< client_endpoint()
-                                << ". Ignoring...\n";
-    }
-    else
-    {
-        timeout_received(timeout, client_endpoint());
-    }
+            session->timer = std::make_unique<asio::steady_timer>(_io, std::chrono::milliseconds(timeout));
+            print_stream() << "Received request from " << session->client_endpoint << " with value \"" << timeout << "\"" << std::endl;
+            start_session(std::move(session));
 
-    // we want to continue listening for other clients even if there was an error
-    start_receive();
-}
-
-void server::async_send_callback(const std::shared_ptr<timed_session>& session,
-                                 const std::string &message,
-                                 const asio::error_code &error,
-                                 std::size_t /*bytes_transferred*/)
-{
-    if(error)
-    {
-        print_stream(std::cerr) << "Error sending: " << error << "\n";
-    }
-
-    response_sent(session, message);
+            start_receive();
+        });
 }
 
 bool server::parse_timeout(int_buffer &buffer, size_t bytes_transferred, int &out_timeout)
@@ -77,48 +70,35 @@ bool server::parse_timeout(int_buffer &buffer, size_t bytes_transferred, int &ou
     return true;
 }
 
-void server::end_session(const std::shared_ptr<timed_session>& session)
+void server::end_session(client_session *session)
 {
-    auto func = std::bind(&server::async_send_callback, this,
-                            session,
-                            _RESPONSE,
-                            std::placeholders::_1,
-                            std::placeholders::_2);
+    _socket.async_send_to(
+        asio::buffer(_RESPONSE),
+        session->client_endpoint,
+        [this, session](const asio::error_code& error, std::size_t)
+        {
+            if (error)
+                print_stream(std::cerr) << "Error while sending response to client " << session->client_endpoint << std::endl;
+            else
+                print_stream() << "Sent response \"" << _RESPONSE << "\" to " << session->client_endpoint << std::endl;
 
-    _socket.async_send_to(asio::buffer(_RESPONSE), session->client_endpoint(), func);
+            _sessions.erase(session);
+        });
 }
 
-void server::add_session(const std::shared_ptr<timed_session>& session)
+void server::start_session(std::unique_ptr<client_session> session)
 {
-    _sessions.insert(session);
-}
+    auto session_ptr = session.get();
+    _sessions.emplace(session_ptr, std::move(session));
 
-void server::remove_session(const std::shared_ptr<timed_session>& session)
-{
-    _sessions.erase(session);
-}
+    session_ptr->timer->async_wait(
+        [this, session_ptr](const asio::error_code& error)
+        {
+            if (error)
+                print_stream(std::cerr) << "Error during timed wait: " << error << "\n";
 
-asio::ip::udp::endpoint& server::client_endpoint()
-{
-    return _remote_endpoint;
-}
-
-void server::timeout_received(int timeout, const asio::ip::udp::endpoint& client_endpoint)
-{
-    std::shared_ptr<timed_session> session = std::make_shared<timed_session>(*this, _io, session_data(client_endpoint, timeout));
-
-    add_session(session);
-
-    session->start();
-
-    print_stream() << "Received request from " << client_endpoint << " with value \"" << timeout << "\"" << std::endl;
-}
-
-void server::response_sent(const std::shared_ptr<timed_session>& session, const std::string& message)
-{
-    remove_session(session);
-
-    print_stream() << "Sent response \"" << message << "\" to "<< session->client_endpoint() << std::endl;
+            end_session(session_ptr);
+        });
 }
 
 }// namespace nxudp

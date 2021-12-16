@@ -24,12 +24,9 @@ set(NXUDP_SOURCES
         src/client.cpp
         src/server.h
         src/server.cpp
-        src/timed_session.h
-        src/timed_session.cpp
         src/int_buffer.h
         src/int_buffer.cpp
         src/print_stream.h
-        src/session_data.h
         src/network_object.cpp
         src/network_object.h)
 
