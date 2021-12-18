@@ -10,7 +10,6 @@
 #include <asio.hpp>
 #include "int_buffer.h"
 #include "export.h"
-#include "network_object.h"
 
 namespace nxudp
 {
@@ -22,8 +21,8 @@ class NXUDP_API server
 
 public:
     /// The Constructor for the server object.
-    /// @param[in] io - the asio::io_service object required to run the server's socket.
-	server(asio::io_service& io);
+    /// @param[in] io - the asio::io_context object required to run the server's socket.
+	server(asio::io_context& io);
 
 	virtual ~server();
 
@@ -58,7 +57,7 @@ private:
     void end_session(client_session* session);
 
 private:
-    asio::io_service& _io;
+    asio::io_context& _io;
     asio::ip::udp::socket _socket;
 
     /// The set of active client_waiter objects.

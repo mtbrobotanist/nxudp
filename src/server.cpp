@@ -14,12 +14,11 @@ namespace nxudp
 
 using asio::ip::udp;
 
-server::server(asio::io_service& io) :
+server::server(asio::io_context& io) :
     _io(io),
-    _socket(io, udp::endpoint(udp::v4(), 0))
+    _socket(io , udp::endpoint(udp::v4(), 0))
 {
-    unsigned short port = _socket.local_endpoint().port();
-    stdcout() << "Listening port " << port << std::endl;
+    stdcout() << "Listening port " << _socket.local_endpoint().port() << std::endl;
 
     start_receive();
 }
@@ -38,7 +37,7 @@ void server::start_receive()
         {
             if (error)
             {
-                stdcerr() << "Got an error while waiting for client connection" << error << std::endl;
+                stdcerr() << "Got an error while waiting for client connection" << error;
                 // we want to continue listening for other clients even if there was an error
                 return start_receive();
             }
@@ -46,12 +45,12 @@ void server::start_receive()
             int timeout;
             if (!parse_timeout(session->timeout_buffer, bytes_transferred, timeout))
             {
-                stdcerr() << "Got an invalid timeout: " << session->timeout_buffer.data() << std::endl;
+                stdcerr() << "Got an invalid timeout: " << session->timeout_buffer.data();
                 return start_receive();
             }
 
             session->timer = std::make_unique<asio::steady_timer>(_io, std::chrono::milliseconds(timeout));
-            stdcout() << "Received request from " << session->client_endpoint << " with value \"" << timeout << "\"" << std::endl;
+            stdcout() << "Received request from " << session->client_endpoint << " with value \"" << timeout << "\"";
             start_session(std::move(session));
 
             start_receive();
@@ -78,9 +77,9 @@ void server::end_session(client_session *session)
         [this, session](const asio::error_code& error, std::size_t)
         {
             if (error)
-                stdcerr() << "Error while sending response to client " << session->client_endpoint << std::endl;
+                stdcerr() << "Error while sending response to client " << session->client_endpoint;
             else
-                stdcout() << "Sent response \"" << _RESPONSE << "\" to " << session->client_endpoint << std::endl;
+                stdcout() << "Sent response \"" << _RESPONSE << "\" to " << session->client_endpoint;
 
             _sessions.erase(session);
         });

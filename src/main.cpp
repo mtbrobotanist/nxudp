@@ -2,18 +2,16 @@
 #include <regex>
 #include <asio.hpp>
 #include <csignal>
-#include "asio/io_service.hpp"
+#include "asio/io_context.hpp"
 #include "program_options.h"
-#include "endpoint_utils.h"
 #include "client.h"
 #include "server.h"
 #include "print_stream.h"
 
 
 using nxudp::stdcout;
-using nxudp::stdcerr;
 
-std::shared_ptr<asio::io_service> io;
+std::unique_ptr<asio::io_context> io;
 bool running_server = false;
 
 
@@ -23,7 +21,7 @@ void signal_handler(int signal)
 
     const char* stop_message = running_server ? "Stopping server." : "Stopping client.";
 
-    stdcout() << stop_message << std::endl;
+    stdcout() << stop_message;
 }
 
 void help()
@@ -34,8 +32,7 @@ void help()
         << "       app -c <ip-address>:<port> -n <milliseconds>\n"
         << "\n"
         << "   Server Mode\n"
-        << "       app -s\n"
-        << std::endl;
+        << "       app -s\n";
 }
 
 void server_mode()
@@ -54,17 +51,8 @@ void client_mode(const std::string& host_port, const std::string& milliseconds)
     std::string host = host_port.substr(0, colon);
     std::string port = host_port.substr(colon + 1);
 
-    std::string error;
-    asio::ip::udp::endpoint server_endpoint;
-    if(nxudp::utils::resolve_endpoint(*io, host, port, server_endpoint, &error))
-    {
-        nxudp::client client(*io, server_endpoint, std::stoi(milliseconds));
-        io->run();
-    }
-    else
-    {
-        stdcerr() << error << std::endl;
-    }
+    nxudp::client client(*io, host, port, std::stoi(milliseconds));
+    io->run();
 }
 
 void add_command_line_validation(nxudp::program_options& options)
@@ -76,7 +64,7 @@ void add_command_line_validation(nxudp::program_options& options)
 
 int main(int argc, char* argv[])
 {
-    io = std::make_shared<asio::io_service>();
+    io = std::make_unique<asio::io_context>();
     std::signal(SIGINT, signal_handler);
 
     nxudp::program_options options(argc, argv);

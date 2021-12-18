@@ -8,7 +8,7 @@ find_path( ASIO_INCLUDE_DIRS asio.hpp
 
 if ( ASIO_INCLUDE_DIRS )
     set( ASIO_FOUND TRUE )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASIO_STANDALONE=YES" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DASIO_STANDALONE=YES -DASIO_NO_DEPRECATED" )
 
     message( STATUS "${Green}Found ASIO include at: ${ASIO_INCLUDE_DIRS}.${Reset}" )
 else ( )

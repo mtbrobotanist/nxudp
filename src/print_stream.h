@@ -20,9 +20,9 @@ public:
     print_stream() : _os(std::cout) {}
     print_stream(std::ostream& os) :_os(os) {}
 
-    ~print_stream()
+    virtual ~print_stream()
     {
-        _os << this->str();
+        _os << this->str() << std::endl;
     }
 
 private:

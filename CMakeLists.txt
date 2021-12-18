@@ -16,8 +16,6 @@ include_directories(${ASIO_INCLUDE_DIRS})
 
 set(NXUDP_SOURCES
 	    src/export.h
-        src/endpoint_utils.h
-        src/endpoint_utils.cpp
         src/program_options.h
         src/program_options.cpp
         src/client.h
@@ -26,9 +24,7 @@ set(NXUDP_SOURCES
         src/server.cpp
         src/int_buffer.h
         src/int_buffer.cpp
-        src/print_stream.h
-        src/network_object.cpp
-        src/network_object.h)
+        src/print_stream.h)
 
 
 if(WIN32)
